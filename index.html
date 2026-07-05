@@ -9,24 +9,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
     
+    <!-- Εισαγωγή Tiki/Tropical Γραμματοσειρών -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --bg-color: #0d0f12;
-            --card-bg: #1a1f26;
-            --accent-color: #d4af37; /* Gold */
+            --bg-color: #0e1310; /* Βαθύ τροπικό σκούρο πράσινο/μαύρο */
+            --card-bg: #171e1a;  /* Σκούρο background για τις κάρτες */
+            --accent-color: #ffd32a; /* Αρχικό Tiki Κίτρινο - Αλλάζει δυναμικά */
             --text-color: #ffffff;
-            --text-muted: #a0aec0;
-            --ios-blue: #007aff;
+            --text-muted: #8fa196;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.4s ease;
         }
 
         header {
@@ -35,21 +38,28 @@
         }
 
         header h1 {
-            font-size: 28px;
-            font-weight: 800;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
             color: var(--accent-color);
             margin: 0;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            transition: color 0.4s ease;
         }
 
         .section-title {
-            font-size: 14px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 15px;
             text-transform: uppercase;
             color: var(--text-muted);
-            margin-bottom: 10px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         /* Cocktail Selector Grid */
@@ -63,31 +73,33 @@
         .cocktail-btn {
             background-color: var(--card-bg);
             border: 2px solid transparent;
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 14px 8px;
             color: var(--text-color);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             word-wrap: break-word;
         }
 
         .cocktail-btn.active {
             border-color: var(--accent-color);
-            background-color: rgba(212, 175, 55, 0.1);
+            background-color: rgba(0, 0, 0, 0.2);
             color: var(--accent-color);
+            transform: scale(1.02);
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
         }
 
         /* Slider Section */
         .slider-container {
             background-color: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         .slider-header {
@@ -98,31 +110,45 @@
         }
 
         .volume-display {
-            font-size: 22px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 24px;
             font-weight: 700;
             color: var(--accent-color);
+            transition: color 0.4s ease;
         }
 
         .slider-input {
             -webkit-appearance: none;
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 10px;
+            border-radius: 5px;
             outline: none;
-            margin: 15px 0;
-            background: #2d3748;
+            margin: 20px 0;
+            background: #25302a;
         }
 
+        /* Test Tube Emoji (🧪) ως Slider Thumb */
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: #ffffff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            width: 36px;
+            height: 36px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="30" x="2" font-size="30">🧪</text></svg>') no-repeat center;
             cursor: pointer;
-            border: 1px solid #ccc;
+            border: none;
+            transition: transform 0.1s ease;
+        }
+        
+        .slider-input::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+
+        .slider-input::-moz-range-thumb {
+            width: 36px;
+            height: 36px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="30" x="2" font-size="30">🧪</text></svg>') no-repeat center;
+            cursor: pointer;
+            border: none;
         }
 
         .slider-labels {
@@ -131,21 +157,22 @@
             color: var(--text-muted);
             font-size: 12px;
             padding: 0 5px;
+            font-weight: 500;
         }
 
         /* Results / Ingredients Section */
         .ingredients-card {
             background-color: var(--card-bg);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         .ingredient-row {
             display: flex;
             justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #2d3748;
+            padding: 14px 0;
+            border-bottom: 1px solid #25302a;
             font-size: 16px;
         }
 
@@ -158,19 +185,21 @@
         }
 
         .ing-amount {
+            font-family: 'Fredoka', sans-serif;
             font-weight: 700;
             color: var(--accent-color);
+            transition: color 0.4s ease;
         }
 
         /* Service info footer inside card */
         .service-info {
             margin-top: 20px;
             padding-top: 15px;
-            border-top: 2px dashed #2d3748;
+            border-top: 2px dashed #25302a;
             font-size: 14px;
-            color: #48bb78; /* Green */
+            color: #4cd137; /* Tiki Green */
             font-weight: 600;
-            line-height: 1.4;
+            line-height: 1.5;
         }
         
         .service-info span {
@@ -178,56 +207,57 @@
             display: block;
             font-size: 11px;
             text-transform: uppercase;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Klio Premix</h1>
+        <h1>🗿 Klio Premix 🌴</h1>
     </header>
 
-    <div class="section-title">Επιλογή Cocktail</div>
+    <div class="section-title">🍹 COCKTAIL</div>
     <div class="cocktail-selector">
-        <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">Happy Hawaiian</button>
-        <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">Three Little Birds</button>
-        <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">Tiki in Tijuana</button>
-        <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">Mama Africa</button>
-        <button class="cocktail-btn" onclick="selectCocktail('kyoto', this)">Kyoto</button>
-        <button class="cocktail-btn" onclick="selectCocktail('tiki_zombie', this)">Tiki Zombie</button>
-        <button class="cocktail-btn" onclick="selectCocktail('bahama_mama', this)">Bahama Mama</button>
-        <button class="cocktail-btn" onclick="selectCocktail('negroni', this)">Negroni</button>
+        <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">🌴 Happy Hawaiian</button>
+        <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">🦜 Three Little Birds</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">🌵 Tiki in Tijuana</button>
+        <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">🌍 Mama Africa</button>
+        <button class="cocktail-btn" onclick="selectCocktail('kyoto', this)">🌸 Kyoto</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_zombie', this)">🧟 Tiki Zombie</button>
+        <button class="cocktail-btn" onclick="selectCocktail('bahama_mama', this)">🥥 Bahama Mama</button>
+        <button class="cocktail-btn" onclick="selectCocktail('negroni', this)">🍊 Negroni</button>
     </div>
 
     <div class="slider-container">
         <div class="slider-header">
-            <span class="section-title" style="margin:0;">Ποσότητα Premix</span>
-            <div class="volume-display" id="volumeDisplay">100 ml</div>
+            <span class="section-title" style="margin:0;">🧪 PREMIX AMOUNT</span>
+            <div class="volume-display" id="volumeDisplay">0 ml</div>
         </div>
-        <input type="range" min="1" max="10" value="1" class="slider-input" id="premixSlider" oninput="updateValues()">
+        <!-- Το min έγινε 0 και το αρχικό value έγινε 0 -->
+        <input type="range" min="0" max="10" value="0" class="slider-input" id="premixSlider" oninput="updateValues()">
         <div class="slider-labels">
-            <span>100ml</span>
+            <span>0ml</span>
             <span>500ml</span>
             <span>1 lt</span>
         </div>
     </div>
 
-    <div class="section-title">Συνταγή / Αναλογίες</div>
+    <div class="section-title">📋 RECIPE</div>
     <div class="ingredients-card">
-        <div id="ingredientsList">
-            </div>
+        <div id="ingredientsList"></div>
         <div class="service-info" id="serviceContainer">
-            <span>Τρόπος Σερβιρίσματος (Service):</span>
+            <span>💡 Service:</span>
             <div id="serviceText"></div>
         </div>
     </div>
 
     <script>
-        // Data structure matching the 1L specs from the images and specifications
         const recipes = {
             happy_hawaiian: {
                 name: "Happy Hawaiian",
+                color: "#00cbc6", /* Τροπικό γαλάζιο */
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Lemon juice", baseAmount: 160, unit: "ml" },
@@ -240,6 +270,7 @@
             },
             three_birds: {
                 name: "Three Little Birds",
+                color: "#ffbb00", /* Κίτρινο της μπανάνας */
                 ingredients: [
                     { name: "Plantation Original dark", baseAmount: 500, unit: "ml" },
                     { name: "Banana puree", baseAmount: 200, unit: "ml" },
@@ -251,6 +282,7 @@
             },
             tiki_tijuana: {
                 name: "Tiki in Tijuana",
+                color: "#4cd137", /* Πράσινο της αγαύης */
                 ingredients: [
                     { name: "Tequila", baseAmount: 550, unit: "ml" },
                     { name: "Mango puree", baseAmount: 220, unit: "ml" },
@@ -261,6 +293,7 @@
             },
             mama_africa: {
                 name: "Mama Africa",
+                color: "#e15f41", /* Ζεστό πορτοκαλί / τερακότα */
                 ingredients: [
                     { name: "Rum", baseAmount: 400, unit: "ml" },
                     { name: "Lemon juice", baseAmount: 160, unit: "ml" },
@@ -272,6 +305,7 @@
             },
             kyoto: {
                 name: "Kyoto",
+                color: "#a55eea", /* Εξωτικό μωβ των ανθών */
                 ingredients: [
                     { name: "Gin", baseAmount: 550, unit: "ml" },
                     { name: "Passionfruit puree", baseAmount: 220, unit: "ml" },
@@ -281,6 +315,7 @@
             },
             tiki_zombie: {
                 name: "Tiki Zombie",
+                color: "#ff3f34", /* Έντονο κόκκινο του Zombie */
                 ingredients: [
                     { name: "White rum", baseAmount: 240, unit: "ml" },
                     { name: "Dark rum", baseAmount: 240, unit: "ml" },
@@ -293,6 +328,7 @@
             },
             bahama_mama: {
                 name: "Bahama Mama",
+                color: "#ff7979", /* Ροζ του ηλιοβασιλέματος */
                 ingredients: [
                     { name: "Rum", baseAmount: 350, unit: "ml" },
                     { name: "Malibu", baseAmount: 140, unit: "ml" },
@@ -304,13 +340,14 @@
             },
             negroni: {
                 name: "Negroni",
+                color: "#c23616", /* Ρουμπινί Campari */
                 ingredients: [
                     { name: "Gin", baseAmount: 300, unit: "ml" },
                     { name: "Campari", baseAmount: 300, unit: "ml" },
                     { name: "Martini Rosso", baseAmount: 300, unit: "ml" },
                     { name: "Water", baseAmount: 100, unit: "ml" }
                 ],
-                service: "Έτοιμο για σερβίρισμα (Όλα τα υλικά περιλαμβάνονται στο premix)"
+                service: "Ready to serve!"
             }
         };
 
@@ -329,8 +366,13 @@
             const sliderValue = parseInt(slider.value);
             const totalVolume = sliderValue * 100;
             
+            const recipe = recipes[currentCocktail];
+            
+            // Δυναμική αλλαγή του accent color στο theme
+            document.documentElement.style.setProperty('--accent-color', recipe.color);
+            
             const percentage = ((sliderValue - slider.min) / (slider.max - slider.min)) * 100;
-            slider.style.background = `linear-gradient(to right, var(--ios-blue) 0%, var(--ios-blue) ${percentage}%, #2d3748 ${percentage}%, #2d3748 100%)`;
+            slider.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percentage}%, #25302a ${percentage}%, #25302a 100%)`;
 
             if (totalVolume === 1000) {
                 document.getElementById('volumeDisplay').innerText = "1 lt";
@@ -338,7 +380,6 @@
                 document.getElementById('volumeDisplay').innerText = totalVolume + " ml";
             }
 
-            const recipe = recipes[currentCocktail];
             const listContainer = document.getElementById('ingredientsList');
             listContainer.innerHTML = '';
 
