@@ -9,14 +9,11 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
     
-    <!-- Σύνδεση με το εικονίδιο images.png -->
     <link rel="apple-touch-icon" href="images.png">
     <link rel="icon" type="image/png" href="images.png">
     
-    <!-- Σύνδεση με το manifest.json -->
     <link rel="manifest" href="manifest.json">
     
-    <!-- Εισαγωγή Tiki/Tropical Γραμματοσειρών -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -126,23 +123,27 @@
 
         .slider-input {
             -webkit-appearance: none;
+            appearance: none;
             width: 100%;
             height: 10px;
             border-radius: 5px;
             outline: none;
             margin: 20px 0;
+            padding: 0;
             background: #25302a;
         }
 
-        /* Test Tube Emoji (🧪) ως Slider Thumb */
+        /* Απόλυτα κεντραρισμένο 🧪 χωρίς background πλαίσιο ή σκιές */
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
             width: 36px;
             height: 36px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="30" x="2" font-size="30">🧪</text></svg>') no-repeat center;
+            background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="31" x="18" font-size="32" text-anchor="middle">🧪</text></svg>') no-repeat center;
             cursor: pointer;
-            border: none;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
             transition: transform 0.1s ease;
         }
         
@@ -153,9 +154,11 @@
         .slider-input::-moz-range-thumb {
             width: 36px;
             height: 36px;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="30" x="2" font-size="30">🧪</text></svg>') no-repeat center;
+            background: transparent url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><text y="31" x="18" font-size="32" text-anchor="middle">🧪</text></svg>') no-repeat center;
             cursor: pointer;
-            border: none;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
         }
 
         .slider-labels {
@@ -163,7 +166,7 @@
             justify-content: space-between;
             color: var(--text-muted);
             font-size: 12px;
-            padding: 0 5px;
+            padding: 0 2px;
             font-weight: 500;
         }
 
