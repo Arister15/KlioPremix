@@ -1,0 +1,18 @@
+{
+  "name": "Klio Premix",
+  "short_name": "Klio Premix",
+  "description": "Calculator for cocktail premixes",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0e1310",
+  "theme_color": "#ffd32a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "images.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
