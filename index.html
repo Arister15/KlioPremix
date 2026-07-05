@@ -25,6 +25,21 @@
             --text-muted: #8fa196;
         }
 
+        /* Κρύβει το scrollbar από το HTML (εκεί που το δείχνει το iOS Safari) */
+        html, body {
+            scrollbar-width: none !important; /* Firefox */
+            -ms-overflow-style: none !important; /* IE/Edge */
+        }
+
+        /* Εξαφανίζει εντελώς την μπάρα σε Safari (iOS) και Chrome */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-color);
@@ -34,15 +49,6 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.4s ease;
-            
-            /* Κρύβει το scrollbar σε Firefox και Edge/IE */
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        /* Κρύβει το scrollbar σε Safari (iOS), Chrome και Opera */
-        body::-webkit-scrollbar {
-            display: none !important;
         }
 
         header {
