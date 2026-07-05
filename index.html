@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KLIO PREMIX</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
+    
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --card-bg: #1a1f26;
+            --accent-color: #d4af37; /* Gold */
+            --text-color: #ffffff;
+            --text-muted: #a0aec0;
+            --ios-blue: #007aff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--accent-color);
+            margin: 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cocktail Selector Grid */
+        .cocktail-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .cocktail-btn {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 15px 10px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .cocktail-btn.active {
+            border-color: var(--accent-color);
+            background-color: rgba(212, 175, 55, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* Slider Section */
+        .slider-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .volume-display {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .slider-input {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #2d3748;
+            outline: none;
+            margin: 15px 0;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 0 5px;
+        }
+
+        /* Results / Ingredients Section */
+        .ingredients-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .ingredient-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #2d3748;
+            font-size: 16px;
+        }
+
+        .ingredient-row:last-child {
+            border-bottom: none;
+        }
+
+        .ing-name {
+            font-weight: 500;
+        }
+
+        .ing-amount {
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        /* Service info footer inside card */
+        .service-info {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #2d3748;
+            font-size: 14px;
+            color: #48bb78; /* Green */
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .service-info span {
+            color: var(--text-muted);
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Klio Premix</h1>
+    </header>
+
+    <div class="section-title">Επιλογή Cocktail</div>
+    <div class="cocktail-selector">
+        <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">Happy Hawaiian</button>
+        <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">Three Little Birds</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">Tiki in Tijuana</button>
+        <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">Mama Africa</button>
+    </div>
+
+    <div class="slider-container">
+        <div class="slider-header">
+            <span class="section-title" style="margin:0;">Ποσότητα Premix</span>
+            <div class="volume-display" id="volumeDisplay">100 ml</div>
+        </div>
+        <input type="range" min="1" max="10" value="1" class="slider-input" id="premixSlider" oninput="updateValues()">
+        <div class="slider-labels">
+            <span>100ml</span>
+            <span>500ml</span>
+            <span>1 Λίτρο</span>
+        </div>
+    </div>
+
+    <div class="section-title">Συνταγή / Αναλογίες</div>
+    <div class="ingredients-card">
+        <div id="ingredientsList">
+            </div>
+        <div class="service-info" id="serviceContainer">
+            <span>Τρόπος Σερβιρίσματος (Service):</span>
+            <div id="serviceText"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data structure matching the 1L specs from the image
+        const recipes = {
+            happy_hawaiian: {
+                name: "Happy Hawaiian",
+                ingredients: [
+                    { name: "Blend of rums", baseAmount: 480, unit: "ml" },
+                    { name: "Lemon juice", baseAmount: 160, unit: "ml" },
+                    { name: "Creme de cacao", baseAmount: 120, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 80, unit: "ml" },
+                    { name: "Passion fruit puree", baseAmount: 80, unit: "ml" },
+                    { name: "Falernum", baseAmount: 40, unit: "ml" }
+                ],
+                service: "120ml Premix + 40ml Pineapple juice"
+            },
+            three_birds: {
+                name: "Three Little Birds",
+                ingredients: [
+                    { name: "Plantation Original dark", baseAmount: 500, unit: "ml" },
+                    { name: "Banana puree", baseAmount: 200, unit: "ml" },
+                    { name: "Lemon juice", baseAmount: 200, unit: "ml" },
+                    { name: "Salted caramel", baseAmount: 100, unit: "ml" },
+                    { name: "Angostura bitters", baseAmount: 10, unit: "σταγόνες / dashes" }
+                ],
+                service: "100ml Premix + 40ml Pineapple juice"
+            },
+            tiki_tijuana: {
+                name: "Tiki in Tijuana",
+                ingredients: [
+                    { name: "Tequila", baseAmount: 550, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 220, unit: "ml" },
+                    { name: "Yuzu liqueur", baseAmount: 110, unit: "ml" },
+                    { name: "Agave syrup", baseAmount: 110, unit: "ml" }
+                ],
+                service: "90ml Premix + 20ml Lime juice"
+            },
+            mama_africa: {
+                name: "Mama Africa",
+                ingredients: [
+                    { name: "Rum", baseAmount: 400, unit: "ml" },
+                    { name: "Lemon juice", baseAmount: 160, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 160, unit: "ml" },
+                    { name: "Biscuit syrup", baseAmount: 160, unit: "ml" },
+                    { name: "Otto's vermouth", baseAmount: 120, unit: "ml" }
+                ],
+                service: "125ml Premix + 30ml Pineapple juice"
+            }
+        };
+
+        let currentCocktail = 'happy_hawaiian';
+
+        function selectCocktail(cocktailKey, element) {
+            // Update active button state
+            document.querySelectorAll('.cocktail-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentCocktail = cocktailKey;
+            updateValues();
+        }
+
+        function updateValues() {
+            const sliderValue = parseInt(document.getElementById('premixSlider').value);
+            const totalVolume = sliderValue * 100;
+            
+            // Update Volume Display Header
+            if (totalVolume === 1000) {
+                document.getElementById('volumeDisplay').innerText = "1 Λίτρο";
+            } else {
+                document.getElementById('volumeDisplay').innerText = totalVolume + " ml";
+            }
+
+            // Calculate & render ingredients
+            const recipe = recipes[currentCocktail];
+            const listContainer = document.getElementById('ingredientsList');
+            listContainer.innerHTML = ''; // Clear old fields
+
+            recipe.ingredients.forEach(ing => {
+                // Since the original image amounts are for a 1L (1000ml) batch:
+                // We divide by 10 to get the 100ml base, then multiply by the slider value.
+                let calculatedAmount = (ing.baseAmount / 10) * sliderValue;
+                
+                // Keep whole numbers, or up to 1 decimal place for precision if needed
+                calculatedAmount = Math.round(calculatedAmount * 10) / 10;
+
+                const row = document.createElement('div');
+                row.className = 'ingredient-row';
+                row.innerHTML = `
+                    <span class="ing-name">${ing.name}</span>
+                    <span class="ing-amount">${calculatedAmount} ${ing.unit}</span>
+                `;
+                listContainer.appendChild(row);
+            });
+
+            // Update service instruction
+            document.getElementById('serviceText').innerText = recipe.service;
+        }
+
+        // Run once on load to populate the default view
+        window.onload = function() {
+            updateValues();
+        }
+    </script>
+</body>
+</html>
