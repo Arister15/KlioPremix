@@ -9,11 +9,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
     
+    <!-- Σύνδεση με το εικονίδιο images.png -->
     <link rel="apple-touch-icon" href="images.png">
     <link rel="icon" type="image/png" href="images.png">
     
+    <!-- Σύνδεση με το manifest.json -->
     <link rel="manifest" href="manifest.json">
     
+    <!-- Εισαγωγή Tiki/Tropical Γραμματοσειρών -->
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -405,6 +408,7 @@
         };
 
         let currentCocktail = 'happy_hawaiian';
+        let lastSliderValue = 0; // Track της προηγούμενης τιμής για το haptic feedback
 
         function selectCocktail(cocktailKey, element) {
             document.querySelectorAll('.cocktail-btn').forEach(btn => btn.classList.remove('active'));
@@ -418,6 +422,14 @@
             const slider = document.getElementById('premixSlider');
             const sliderValue = parseInt(slider.value);
             const totalVolume = sliderValue * 100;
+            
+            // Μηχανισμός Haptic Feedback: Δονείται ΜΟΝΟ όταν αλλάξει πραγματικά η τιμή (σκαλοπάτι)
+            if (sliderValue !== lastSliderValue) {
+                if (navigator.vibrate) {
+                    navigator.vibrate(12); // Σύντομο "κλικ" δόνησης
+                }
+                lastSliderValue = sliderValue;
+            }
             
             const recipe = recipes[currentCocktail];
             
