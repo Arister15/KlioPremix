@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="el" style="background-color: #0e1310;">
+<html lang="el">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KLIO PREMIX</title>
     
-    <!-- Theme Color για ακαριαίο μαύρο φόντο στο άνοιγμα του PWA -->
+    <!-- Ορίζουμε παντού σκούρο θέμα για να μην υπάρχει ΠΟΤΕ λευκό φλας στο webview -->
     <meta name="theme-color" content="#0e1310">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,6 +21,7 @@
     
     <style>
         :root {
+            color-scheme: dark; /* Υποχρεώνει το κινητό σε native dark canvas */
             --bg-color: #0e1310;
             --card-bg: #171e1a;
             --accent-color: #ffd32a;
@@ -30,6 +31,7 @@
 
         html, body {
             background-color: #0e1310 !important;
+            color: var(--text-color);
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }
@@ -44,15 +46,11 @@
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: var(--text-color);
             margin: 0;
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            
-            /* Smooth Fade Animation */
-            will-change: opacity;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background-color 0.4s ease;
         }
 
         header {
@@ -305,7 +303,7 @@
         }
     </style>
 </head>
-<body style="background-color: #0e1310; opacity: 0;">
+<body>
 
     <header>
         <h1>🗿 Klio Premix 🌴</h1>
@@ -537,28 +535,13 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Περιμένουμε να φορτώσουν ΌΛΑ (και οι γραμματοσειρές) πριν εμφανίσουμε τη σελίδα
-        window.addEventListener('load', () => {
-            updateValues();
-            setTimeout(() => {
-                document.body.style.opacity = '1';
-            }, 80);
-        });
+        // Ακαριαίος υπολογισμός χωρίς αναμονές ή delays
+        updateValues();
 
-        // Service Worker Registration
+        // Καθαρό Service Worker Registration χωρίς force reloads
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then((reg) => {
-                    reg.update();
-                }).catch((err) => console.error('SW Error:', err));
-            });
-
-            let refreshing = false;
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (!refreshing) {
-                    refreshing = true;
-                    window.location.reload();
-                }
+                navigator.serviceWorker.register('./sw.js').catch((err) => console.error('SW Error:', err));
             });
         }
     </script>
