@@ -3,52 +3,23 @@
 <head>
     <meta charset="UTF-8">
     
-    <!-- 1. CRITICAL BACKGROUND STYLING (Πριν από οποιοδήποτε εξωτερικό link) -->
+    <!-- 1. CRITICAL SPLASH & BACKGROUND STYLING (Πρώτο-πρώτο tag για ακαριαίο render στο 1ο frame) -->
     <style>
         html, body {
             background-color: #0e1310 !important;
             background: #0e1310 !important;
-        }
-    </style>
-
-    <!-- 2. NATIVE DARK CANVAS & PWA META -->
-    <meta name="color-scheme" content="dark">
-    <meta name="theme-color" content="#0e1310">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <title>KLIO PREMIX</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
-    
-    <link rel="apple-touch-icon" href="images.png">
-    <link rel="icon" type="image/png" href="images.png">
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- 3. EXTERNAL FONTS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            color-scheme: dark;
-            --bg-color: #0e1310;
-            --card-bg: #171e1a;
-            --accent-color: #ffd32a;
-            --text-color: #ffffff;
-            --text-muted: #8fa196;
+            margin: 0;
+            padding: 0;
         }
 
-        /* --- SPLASH SCREEN --- */
+        /* Splash Screen Critical Styles - Render αμέσως πριν από οποιοδήποτε εξωτερικό resource */
         #app-splash {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #0e1310;
+            background-color: #0e1310 !important;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -72,11 +43,46 @@
         .splash-icon {
             font-size: 50px;
             animation: splashPulse 1.2s infinite ease-in-out;
+            will-change: transform, opacity;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
 
         @keyframes splashPulse {
-            0%, 100% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.15); opacity: 1; }
+            0%, 100% { transform: scale(1) translateZ(0); opacity: 0.8; }
+            50% { transform: scale(1.15) translateZ(0); opacity: 1; }
+        }
+    </style>
+
+    <!-- 2. NATIVE DARK CANVAS & PWA META -->
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0e1310">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <title>KLIO PREMIX</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
+    
+    <link rel="apple-touch-icon" href="images.png">
+    <link rel="icon" type="image/png" href="images.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- 3. EXTERNAL FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 4. MAIN APPLICATION STYLES -->
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-color: #0e1310;
+            --card-bg: #171e1a;
+            --accent-color: #ffd32a;
+            --text-color: #ffffff;
+            --text-muted: #8fa196;
         }
 
         html, body {
@@ -590,7 +596,7 @@
 
         updateValues();
 
-        /* --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ SPLASH SCREEN (ΜΕΧΡΙ ΝΑ ΦΟΡΤΩΣΟΥΝ ΤΑ ΠΑΝΤΑ) --- */
+        /* --- ΕΛΕΓΧΟΣ SPLASH SCREEN (ΑΚΑΡΙΑΙΟ RENDER & ΠΛΗΡΗΣ ΑΝΑΜΟΝΗ) --- */
         const windowLoaded = new Promise((resolve) => {
             if (document.readyState === 'complete') resolve();
             else window.addEventListener('load', resolve);
@@ -601,7 +607,7 @@
             : Promise.resolve();
 
         Promise.all([windowLoaded, fontsLoaded]).then(() => {
-            // Διπλό rAF ώστε ο browser να ολοκληρώσει 100% το render της εφαρμογής πίσω από το splash screen
+            // Διπλό rAF ώστε ο browser να ολοκληρώσει 100% το render πίσω από το splash screen
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     const splash = document.getElementById('app-splash');
