@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KLIO PREMIX</title>
     
-    <!-- Ορίζουμε παντού σκούρο θέμα για να μην υπάρχει ΠΟΤΕ λευκό φλας στο webview -->
     <meta name="theme-color" content="#0e1310">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,13 +20,49 @@
     
     <style>
         :root {
-            color-scheme: dark; /* Υποχρεώνει το κινητό σε native dark canvas */
+            color-scheme: dark;
             --bg-color: #0e1310;
             --card-bg: #171e1a;
             --accent-color: #ffd32a;
             --text-color: #ffffff;
             --text-muted: #8fa196;
         }
+
+        /* --- SPLASH SCREEN LOADER --- */
+        #app-splash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0e1310;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            opacity: 1;
+            visibility: visible;
+            will-change: opacity, visibility;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease;
+        }
+
+        #app-splash.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .splash-icon {
+            font-size: 50px;
+            animation: splashPulse 1.2s infinite ease-in-out;
+        }
+
+        @keyframes splashPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+        /* --------------------------- */
 
         html, body {
             background-color: #0e1310 !important;
@@ -305,6 +340,11 @@
 </head>
 <body>
 
+    <!-- Splash Screen overlay: Κρύβει τα πάντα μέχρι να υπολογιστούν γραμματοσειρές και DOM -->
+    <div id="app-splash">
+        <div class="splash-icon">🗿</div>
+    </div>
+
     <header>
         <h1>🗿 Klio Premix 🌴</h1>
     </header>
@@ -535,10 +575,31 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Ακαριαίος υπολογισμός χωρίς αναμονές ή delays
+        // 1. Αρχικοποίηση συνταγής στο παρασκήνιο
         updateValues();
 
-        // Καθαρό Service Worker Registration χωρίς force reloads
+        // 2. Συνάρτηση για να εξαφανιστεί ομαλά το Splash Screen
+        function dismissSplash() {
+            const splash = document.getElementById('app-splash');
+            if (splash && !splash.classList.contains('hidden')) {
+                splash.classList.add('hidden');
+                setTimeout(() => splash.remove(), 400); // Αφαίρεση από το DOM μετά το fade-out
+            }
+        }
+
+        // 3. Περιμένουμε να φορτώσουν οι γραμματοσειρές (Fonts) & το layout πριν κάνουμε reveal
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                requestAnimationFrame(() => setTimeout(dismissSplash, 150));
+            });
+        } else {
+            window.addEventListener('load', () => setTimeout(dismissSplash, 150));
+        }
+
+        // Safety fallback αν αργήσει το δίκτυο
+        setTimeout(dismissSplash, 600);
+
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch((err) => console.error('SW Error:', err));
