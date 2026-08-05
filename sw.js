@@ -1,45 +1,46 @@
-const CACHE_NAME = 'premix-v1';
-// Εδώ βάζουμε όλα τα αρχεία που θέλουμε να αποθηκεύονται στο κινητό
+const CACHE_NAME = 'klio-premix-v2'; // 👈 Κάθε φορά που κάνεις αλλαγές στο μέλλον, άλλαζε το v2 σε v3, v4 κτλ.
+
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './manifest.json',
-  './images.png' // Αν το εικονίδιό σου έχει άλλο όνομα στο manifest, άλλαξέ το εδώ
+  './images.png',
+  './manifest.json'
 ];
 
-// Εγκατάσταση του Service Worker και αποθήκευση των αρχείων στη μνήμη (Cache)
+// Εγκατάσταση και άμεση παράκαμψη αναμονής (skipWaiting)
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Caching app assets...');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+  );
 });
 
-// Καθαρισμός παλιάς μνήμης cache αν κάνεις αναβάθμιση (π.χ. αν αλλάξεις το premix-v1 σε v2)
+// Καθαρισμός παλιάς cache κατά την ενεργοποίηση
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            console.log('Clearing old cache...');
-            return caches.delete(cache);
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Στρατηγική "Cache First": Κοιτάζει πρώτα στη μνήμη του κινητού. Αν είσαι offline, φορτώνει από εκεί.
+// Στρατηγική Network First: Προσπαθεί να φέρει τα φρέσκα δεδομένα και αν είναι offline παίρνει από την cache
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return cachedResponse || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
