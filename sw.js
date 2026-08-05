@@ -1,4 +1,4 @@
-const CACHE_NAME = 'klio-premix-v2'; // 👈 Κάθε φορά που κάνεις αλλαγές στο μέλλον, άλλαζε το v2 σε v3, v4 κτλ.
+const CACHE_NAME = 'klio-premix-v3'; // 👈 Κάθε φορά που κάνεις αλλαγές στο μέλλον, άλλαζε το v2 σε v3, v4 κτλ.
 
 const ASSETS_TO_CACHE = [
   './',
