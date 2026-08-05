@@ -26,7 +26,7 @@
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
     
-    <!-- 3. EXTERNAL FONTS (Φορτώνουν μετά το background) -->
+    <!-- 3. EXTERNAL FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -56,7 +56,11 @@
             opacity: 1;
             visibility: visible;
             will-change: opacity, visibility;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
         }
 
         #app-splash.hidden {
@@ -586,23 +590,28 @@
 
         updateValues();
 
-        function dismissSplash() {
-            const splash = document.getElementById('app-splash');
-            if (splash && !splash.classList.contains('hidden')) {
-                splash.classList.add('hidden');
-                setTimeout(() => splash.remove(), 300);
-            }
-        }
+        /* --- ΑΥΣΤΗΡΟΣ ΕΛΕΓΧΟΣ SPLASH SCREEN (ΜΕΧΡΙ ΝΑ ΦΟΡΤΩΣΟΥΝ ΤΑ ΠΑΝΤΑ) --- */
+        const windowLoaded = new Promise((resolve) => {
+            if (document.readyState === 'complete') resolve();
+            else window.addEventListener('load', resolve);
+        });
 
-        if (document.fonts && document.fonts.ready) {
-            document.fonts.ready.then(() => {
-                requestAnimationFrame(() => setTimeout(dismissSplash, 100));
+        const fontsLoaded = (document.fonts && document.fonts.ready) 
+            ? document.fonts.ready 
+            : Promise.resolve();
+
+        Promise.all([windowLoaded, fontsLoaded]).then(() => {
+            // Διπλό rAF ώστε ο browser να ολοκληρώσει 100% το render της εφαρμογής πίσω από το splash screen
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    const splash = document.getElementById('app-splash');
+                    if (splash) {
+                        splash.classList.add('hidden');
+                        setTimeout(() => splash.remove(), 500);
+                    }
+                });
             });
-        } else {
-            window.addEventListener('load', () => setTimeout(dismissSplash, 100));
-        }
-
-        setTimeout(dismissSplash, 500);
+        });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
