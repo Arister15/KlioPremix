@@ -1,46 +1,33 @@
-const CACHE_NAME = 'klio-premix-v3'; // 👈 Κάθε φορά που κάνεις αλλαγές στο μέλλον, άλλαζε το v2 σε v3, v4 κτλ.
+const CACHE_NAME = 'klio-premix-live';
 
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './images.png',
-  './manifest.json'
-];
-
-// Εγκατάσταση και άμεση παράκαμψη αναμονής (skipWaiting)
+// Εγκατάσταση και άμεση ενεργοποίηση
 self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
-  );
 });
 
-// Καθαρισμός παλιάς cache κατά την ενεργοποίηση
+// Ενεργοποίηση
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
-  );
+  event.waitUntil(self.clients.claim());
 });
 
-// Στρατηγική Network First: Προσπαθεί να φέρει τα φρέσκα δεδομένα και αν είναι offline παίρνει από την cache
+// Στρατηγική Network-First (Ζητάει πάντα το φρέσκο αρχείο από το GitHub)
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-cache' })
       .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        if (networkResponse && networkResponse.status === 200) {
           const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
         }
         return networkResponse;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => {
+        // Αν δεν έχεις ίντερνετ (Offline), σερβίρει την τελευταία αποθηκευμένη έκδοση
+        return caches.match(event.request);
+      })
   );
 });
