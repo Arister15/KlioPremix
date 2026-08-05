@@ -51,7 +51,7 @@
             
             /* Αρχικά κρυφό για να αποφύγουμε το flicker κατά το φόρτωμα */
             opacity: 0;
-            transition: opacity 0.3s ease-in-out, background-color 0.4s ease;
+            transition: opacity 0.35s ease-in-out, background-color 0.4s ease;
         }
 
         /* Εμφάνιση ομαλά μόλις ετοιμαστεί η JS */
@@ -541,28 +541,31 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Smooth άνοιγμα μόλις φορτώσουν τα στοιχεία της σελίδας
+        // Smooth άνοιγμα με μικρό delay για να προλάβει ο browser το render
         document.addEventListener('DOMContentLoaded', () => {
             updateValues();
-            document.body.classList.add('loaded');
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    document.body.classList.add('loaded');
+                }, 50);
+            });
         });
 
-        // Service Worker Registration με αυτόματο reload όταν ανιχνευθεί νέα έκδοση
+        // Service Worker Registration με Force Update & Auto-Reload
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
-                    reg.update();
-                    reg.addEventListener('updatefound', () => {
-                        const newWorker = reg.installing;
-                        if (newWorker) {
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                    window.location.reload();
-                                }
-                            });
-                        }
-                    });
-                }).catch((err) => console.error('Service Worker Registration failed:', err));
+                    reg.update(); // Έλεγχος για νέο SW στο server
+                }).catch((err) => console.error('SW Error:', err));
+            });
+
+            // Όταν ο νέος Service Worker πάρει τον έλεγχο, κάνε ακαριαία ανανέωση τη σελίδα
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
             });
         }
     </script>
