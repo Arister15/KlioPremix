@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="el" style="background-color: #0e1310;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>KLIO PREMIX</title>
     
+    <!-- Theme Color για ακαριαίο μαύρο φόντο στο άνοιγμα του PWA -->
+    <meta name="theme-color" content="#0e1310">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
@@ -26,8 +28,7 @@
             --text-muted: #8fa196;
         }
 
-        /* Κλειδώνουμε το σκούρο φόντο στο html για να μην υπάρχει ΠΟΤΕ λευκό φλας */
-        html {
+        html, body {
             background-color: #0e1310 !important;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
@@ -43,21 +44,15 @@
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             
-            /* Ultra smooth GPU-accelerated fade-in */
-            opacity: 0;
+            /* Smooth Fade Animation */
             will-change: opacity;
-            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        body.loaded {
-            opacity: 1;
+            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         header {
@@ -310,7 +305,7 @@
         }
     </style>
 </head>
-<body>
+<body style="background-color: #0e1310; opacity: 0;">
 
     <header>
         <h1>🗿 Klio Premix 🌴</h1>
@@ -542,17 +537,15 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Τέλειο frame-synchronized άνοιγμα χωρίς flashes
-        document.addEventListener('DOMContentLoaded', () => {
+        // Περιμένουμε να φορτώσουν ΌΛΑ (και οι γραμματοσειρές) πριν εμφανίσουμε τη σελίδα
+        window.addEventListener('load', () => {
             updateValues();
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    document.body.classList.add('loaded');
-                });
-            });
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 80);
         });
 
-        // Service Worker Registration με Force Update & Auto-Reload
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
