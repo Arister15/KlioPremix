@@ -45,7 +45,12 @@
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.4s ease;
+            opacity: 0;
+            transition: opacity 1s ease-in-out, background-color 0.4s ease;
+        }
+
+        body.loaded {
+            opacity: 1;
         }
 
         header {
@@ -532,6 +537,7 @@
 
         window.onload = function() {
             updateValues();
+            document.body.classList.add('loaded');
         }
 
         // Service Worker Registration με αυτόματο reload όταν ανιχνευθεί νέα έκδοση
