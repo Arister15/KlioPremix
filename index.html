@@ -1,104 +1,22 @@
 <!DOCTYPE html>
-<html lang="el" style="background-color: #0e1310;">
+<html lang="el">
 <head>
-    <!-- 0ms Blocking Execution: Κλειδώνει το φόντο σε σκούρο πριν ξεκινήσει το rendering -->
-    <script>
-        document.documentElement.style.backgroundColor = '#0e1310';
-        document.documentElement.style.colorScheme = 'dark';
-    </script>
-
     <meta charset="UTF-8">
-
-    <!-- 1. CRITICAL SPLASH & BACKGROUND STYLING (Εκτελείται ακαριαία στο 1ο frame) -->
-    <style>
-        html, body {
-            background-color: #0e1310 !important;
-            background: #0e1310 !important;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Splash Screen Critical Styles */
-        #app-splash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #0e1310 !important;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 999999;
-            opacity: 1;
-            visibility: visible;
-            will-change: opacity, visibility;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-            contain: strict;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        }
-
-        #app-splash.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-
-        .splash-icon {
-            font-size: 50px;
-            animation: splashPulse 1.2s infinite ease-in-out;
-            will-change: transform, opacity;
-            -webkit-transform: translateZ(0);
-            transform: translateZ(0);
-        }
-
-        @keyframes splashPulse {
-            0%, 100% { 
-                transform: scale(1) translateZ(0); 
-                opacity: 0.8; 
-            }
-            50% { 
-                transform: scale(1.15) translateZ(0); 
-                opacity: 1; 
-            }
-        }
-    </style>
-
-    <!-- 2. PWA & THEME CONFIGURATION -->
-    <meta name="color-scheme" content="dark">
-    <meta name="supported-color-schemes" content="dark">
-    <meta name="theme-color" content="#0e1310">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-
     <title>KLIO PREMIX</title>
-
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
-    <link rel="apple-touch-startup-image" href="images.png">
-
+    
     <link rel="apple-touch-icon" href="images.png">
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
-
-    <!-- 3. NON-RENDER-BLOCKING GOOGLE FONTS -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
-    <noscript>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap">
-    </noscript>
-
-    <!-- 4. MAIN APPLICATION STYLES -->
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            color-scheme: dark;
             --bg-color: #0e1310;
             --card-bg: #171e1a;
             --accent-color: #ffd32a;
@@ -107,7 +25,6 @@
         }
 
         html, body {
-            color: var(--text-color);
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }
@@ -122,12 +39,13 @@
 
         body {
             font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             transition: background-color 0.4s ease;
-            box-sizing: border-box;
         }
 
         header {
@@ -382,56 +300,47 @@
 </head>
 <body>
 
-    <!-- SPLASH SCREEN CONTAINER -->
-    <div id="app-splash">
-        <div class="splash-icon">🗿</div>
+    <header>
+        <h1>🗿 Klio Premix 🌴</h1>
+    </header>
+
+    <div class="section-title">🍹 COCKTAIL</div>
+    <div class="cocktail-selector">
+        <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">🌴 Happy Hawaiian</button>
+        <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">🦜 Three Little Birds</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">🌵 Tiki in Tijuana</button>
+        <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">🌍 Mama Africa</button>
+        <button class="cocktail-btn" onclick="selectCocktail('kyoto', this)">🌸 Kyoto</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_zombie', this)">🧟 Tiki Zombie</button>
+        <button class="cocktail-btn" onclick="selectCocktail('bahama_mama', this)">🥥 Bahama Mama</button>
+        <button class="cocktail-btn" onclick="selectCocktail('negroni', this)">🍊 Negroni</button>
     </div>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="app">
-        <header>
-            <h1>🗿 Klio Premix 🌴</h1>
-        </header>
-
-        <div class="section-title">🍹 COCKTAIL</div>
-        <div class="cocktail-selector">
-            <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">🌴 Happy Hawaiian</button>
-            <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">🦜 Three Little Birds</button>
-            <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">🌵 Tiki in Tijuana</button>
-            <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">🌍 Mama Africa</button>
-            <button class="cocktail-btn" onclick="selectCocktail('kyoto', this)">🌸 Kyoto</button>
-            <button class="cocktail-btn" onclick="selectCocktail('tiki_zombie', this)">🧟 Tiki Zombie</button>
-            <button class="cocktail-btn" onclick="selectCocktail('bahama_mama', this)">🥥 Bahama Mama</button>
-            <button class="cocktail-btn" onclick="selectCocktail('negroni', this)">🍊 Negroni</button>
+    <div class="slider-container">
+        <div class="slider-header">
+            <span class="section-title" style="margin:0;">🧪 PREMIX AMOUNT</span>
+            <div class="volume-display" id="volumeDisplay">1 lt</div>
         </div>
-
-        <div class="slider-container">
-            <div class="slider-header">
-                <span class="section-title" style="margin:0;">🧪 PREMIX AMOUNT</span>
-                <div class="volume-display" id="volumeDisplay">1 lt</div>
-            </div>
-            <div class="slider-wrapper">
-                <div class="slider-track" id="sliderTrack"></div>
-                <input type="range" min="0" max="10" value="10" class="slider-input" id="premixSlider" oninput="updateValues()">
-            </div>
-            <div class="slider-labels">
-                <span>0ml</span>
-                <span>500ml</span>
-                <span>1 lt</span>
-            </div>
+        <div class="slider-wrapper">
+            <div class="slider-track" id="sliderTrack"></div>
+            <input type="range" min="0" max="10" value="10" class="slider-input" id="premixSlider" oninput="updateValues()">
         </div>
-
-        <div class="section-title">📋 RECIPE</div>
-        <div class="ingredients-card">
-            <div id="ingredientsList"></div>
-            <div class="service-info" id="serviceContainer">
-                <span>💡 Service:</span>
-                <div id="serviceText"></div>
-            </div>
+        <div class="slider-labels">
+            <span>0ml</span>
+            <span>500ml</span>
+            <span>1 lt</span>
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT LOGIC -->
+    <div class="section-title">📋 RECIPE</div>
+    <div class="ingredients-card">
+        <div id="ingredientsList"></div>
+        <div class="service-info" id="serviceContainer">
+            <span>💡 Service:</span>
+            <div id="serviceText"></div>
+        </div>
+    </div>
+
     <script>
         const recipes = {
             happy_hawaiian: {
@@ -621,36 +530,26 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Αρχική εκτέλεση
-        updateValues();
+        window.onload = function() {
+            updateValues();
+        }
 
-        /* --- ΕΛΕΓΧΟΣ SPLASH SCREEN (ΑΚΑΡΙΑΙΟ RENDER & ΠΛΗΡΗΣ ΑΝΑΜΟΝΗ) --- */
-        const windowLoaded = new Promise((resolve) => {
-            if (document.readyState === 'complete') resolve();
-            else window.addEventListener('load', resolve);
-        });
-
-        const fontsLoaded = (document.fonts && document.fonts.ready) 
-            ? document.fonts.ready 
-            : Promise.resolve();
-
-        Promise.all([windowLoaded, fontsLoaded]).then(() => {
-            // Διπλό rAF ώστε ο browser να ολοκληρώσει 100% το render πίσω από το splash screen
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    const splash = document.getElementById('app-splash');
-                    if (splash) {
-                        splash.classList.add('hidden');
-                        setTimeout(() => splash.remove(), 500);
-                    }
-                });
-            });
-        });
-
-        // Register Service Worker
+        // Service Worker Registration με αυτόματο reload όταν ανιχνευθεί νέα έκδοση
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch((err) => console.error('SW Error:', err));
+                navigator.serviceWorker.register('./sw.js').then((reg) => {
+                    reg.update();
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    });
+                }).catch((err) => console.error('Service Worker Registration failed:', err));
             });
         }
     </script>
