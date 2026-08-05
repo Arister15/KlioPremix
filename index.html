@@ -13,6 +13,9 @@
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
     
+    <!-- Preconnect για ακαριαίο φόρτωμα των Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -45,7 +48,15 @@
             padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.4s ease;
+            
+            /* Αρχικά κρυφό για να αποφύγουμε το flicker κατά το φόρτωμα */
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, background-color 0.4s ease;
+        }
+
+        /* Εμφάνιση ομαλά μόλις ετοιμαστεί η JS */
+        body.loaded {
+            opacity: 1;
         }
 
         header {
@@ -530,9 +541,11 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        window.onload = function() {
+        // Smooth άνοιγμα μόλις φορτώσουν τα στοιχεία της σελίδας
+        document.addEventListener('DOMContentLoaded', () => {
             updateValues();
-        }
+            document.body.classList.add('loaded');
+        });
 
         // Service Worker Registration με αυτόματο reload όταν ανιχνευθεί νέα έκδοση
         if ('serviceWorker' in navigator) {
