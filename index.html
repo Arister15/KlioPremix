@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<html lang="el">
+<html lang="el" style="background-color: #0e1310;">
 <head>
     <meta charset="UTF-8">
+    
+    <!-- 1. CRITICAL BACKGROUND STYLING (Πριν από οποιοδήποτε εξωτερικό link) -->
+    <style>
+        html, body {
+            background-color: #0e1310 !important;
+            background: #0e1310 !important;
+        }
+    </style>
+
+    <!-- 2. NATIVE DARK CANVAS & PWA META -->
+    <meta name="color-scheme" content="dark">
+    <meta name="theme-color" content="#0e1310">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>KLIO PREMIX</title>
     
-    <meta name="theme-color" content="#0e1310">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
@@ -14,6 +26,7 @@
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
     
+    <!-- 3. EXTERNAL FONTS (Φορτώνουν μετά το background) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -28,7 +41,7 @@
             --text-muted: #8fa196;
         }
 
-        /* --- SPLASH SCREEN LOADER --- */
+        /* --- SPLASH SCREEN --- */
         #app-splash {
             position: fixed;
             top: 0;
@@ -37,14 +50,13 @@
             height: 100vh;
             background-color: #0e1310;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 999999;
             opacity: 1;
             visibility: visible;
             will-change: opacity, visibility;
-            transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.4s ease;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
         #app-splash.hidden {
@@ -62,10 +74,8 @@
             0%, 100% { transform: scale(1); opacity: 0.8; }
             50% { transform: scale(1.15); opacity: 1; }
         }
-        /* --------------------------- */
 
         html, body {
-            background-color: #0e1310 !important;
             color: var(--text-color);
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
@@ -338,9 +348,8 @@
         }
     </style>
 </head>
-<body>
+<body style="background-color: #0e1310;">
 
-    <!-- Splash Screen overlay: Κρύβει τα πάντα μέχρι να υπολογιστούν γραμματοσειρές και DOM -->
     <div id="app-splash">
         <div class="splash-icon">🗿</div>
     </div>
@@ -575,31 +584,26 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // 1. Αρχικοποίηση συνταγής στο παρασκήνιο
         updateValues();
 
-        // 2. Συνάρτηση για να εξαφανιστεί ομαλά το Splash Screen
         function dismissSplash() {
             const splash = document.getElementById('app-splash');
             if (splash && !splash.classList.contains('hidden')) {
                 splash.classList.add('hidden');
-                setTimeout(() => splash.remove(), 400); // Αφαίρεση από το DOM μετά το fade-out
+                setTimeout(() => splash.remove(), 300);
             }
         }
 
-        // 3. Περιμένουμε να φορτώσουν οι γραμματοσειρές (Fonts) & το layout πριν κάνουμε reveal
         if (document.fonts && document.fonts.ready) {
             document.fonts.ready.then(() => {
-                requestAnimationFrame(() => setTimeout(dismissSplash, 150));
+                requestAnimationFrame(() => setTimeout(dismissSplash, 100));
             });
         } else {
-            window.addEventListener('load', () => setTimeout(dismissSplash, 150));
+            window.addEventListener('load', () => setTimeout(dismissSplash, 100));
         }
 
-        // Safety fallback αν αργήσει το δίκτυο
-        setTimeout(dismissSplash, 600);
+        setTimeout(dismissSplash, 500);
 
-        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch((err) => console.error('SW Error:', err));
