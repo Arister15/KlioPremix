@@ -216,20 +216,26 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
+        .ingredient-item {
+            border-bottom: 1px solid #25302a;
+            padding: 14px 0;
+        }
+
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+
         .ingredient-row {
             display: flex;
             justify-content: space-between;
-            padding: 14px 0;
-            border-bottom: 1px solid #25302a;
+            align-items: center;
             font-size: 16px;
-        }
-
-        .ingredient-row:last-child {
-            border-bottom: none;
         }
 
         .ing-name {
             font-weight: 500;
+            display: flex;
+            align-items: center;
         }
 
         .ing-amount {
@@ -237,6 +243,39 @@
             font-weight: 700;
             color: var(--accent-color);
             transition: color 0.4s ease;
+        }
+
+        .info-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 6px;
+            padding: 2px 4px;
+            line-height: 1;
+            opacity: 0.85;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .info-btn:active {
+            transform: scale(1.2);
+            opacity: 1;
+        }
+
+        .ingredient-info-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.25);
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #dcdde1;
+            line-height: 1.6;
+        }
+
+        .ingredient-info-box.active {
+            display: block;
         }
 
         .service-info {
@@ -357,7 +396,17 @@
                 color: "#a55eea",
                 ingredients: [
                     { name: "Gin", baseAmount: 550, unit: "ml" },
-                    { name: "Mint syrup", baseAmount: 275, unit: "ml" },
+                    { 
+                        name: "Mint syrup", 
+                        baseAmount: 275, 
+                        unit: "ml",
+                        info: [
+                            "2.5 κούπες ζάχαρη",
+                            "Καυτό νερό μέχρι 800ml",
+                            "1 γαστρονόμος δυόσμο",
+                            "30 λεπτά στην άκρη"
+                        ]
+                    },
                     { name: "Passionfruit puree", baseAmount: 110, unit: "ml" }
                 ],
                 service: "85ml Premix + 30ml Lime juice"
@@ -411,6 +460,14 @@
             updateValues();
         }
 
+        function toggleIngInfo(id, event) {
+            event.stopPropagation();
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('active');
+            }
+        }
+
         function updateValues() {
             const slider = document.getElementById('premixSlider');
             const sliderValue = parseInt(slider.value);
@@ -441,17 +498,33 @@
             const listContainer = document.getElementById('ingredientsList');
             listContainer.innerHTML = '';
 
-            recipe.ingredients.forEach(ing => {
+            recipe.ingredients.forEach((ing, index) => {
                 let calculatedAmount = (ing.baseAmount / 10) * sliderValue;
                 calculatedAmount = Math.round(calculatedAmount * 10) / 10;
 
-                const row = document.createElement('div');
-                row.className = 'ingredient-row';
-                row.innerHTML = `
-                    <span class="ing-name">${ing.name}</span>
-                    <span class="ing-amount">${calculatedAmount} ${ing.unit}</span>
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'ingredient-item';
+
+                let infoBtn = '';
+                let infoBox = '';
+
+                if (ing.info) {
+                    const infoContent = Array.isArray(ing.info) 
+                        ? ing.info.map(line => `• ${line}`).join('<br>') 
+                        : ing.info;
+
+                    infoBtn = `<button class="info-btn" onclick="toggleIngInfo('ing-info-${index}', event)">ℹ️</button>`;
+                    infoBox = `<div id="ing-info-${index}" class="ingredient-info-box">${infoContent}</div>`;
+                }
+
+                itemDiv.innerHTML = `
+                    <div class="ingredient-row">
+                        <span class="ing-name">${ing.name} ${infoBtn}</span>
+                        <span class="ing-amount">${calculatedAmount} ${ing.unit}</span>
+                    </div>
+                    ${infoBox}
                 `;
-                listContainer.appendChild(row);
+                listContainer.appendChild(itemDiv);
             });
 
             document.getElementById('serviceText').innerText = recipe.service;
