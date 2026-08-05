@@ -13,7 +13,6 @@
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
     
-    <!-- Preconnect για ακαριαίο φόρτωμα των Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -27,7 +26,9 @@
             --text-muted: #8fa196;
         }
 
-        html, body {
+        /* Κλειδώνουμε το σκούρο φόντο στο html για να μην υπάρχει ΠΟΤΕ λευκό φλας */
+        html {
+            background-color: #0e1310 !important;
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
         }
@@ -49,12 +50,12 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             
-            /* Αρχικά κρυφό για να αποφύγουμε το flicker κατά το φόρτωμα */
+            /* Ultra smooth GPU-accelerated fade-in */
             opacity: 0;
-            transition: opacity 0.35s ease-in-out, background-color 0.4s ease;
+            will-change: opacity;
+            transition: opacity 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* Εμφάνιση ομαλά μόλις ετοιμαστεί η JS */
         body.loaded {
             opacity: 1;
         }
@@ -541,13 +542,13 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Smooth άνοιγμα με μικρό delay για να προλάβει ο browser το render
+        // Τέλειο frame-synchronized άνοιγμα χωρίς flashes
         document.addEventListener('DOMContentLoaded', () => {
             updateValues();
             requestAnimationFrame(() => {
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                     document.body.classList.add('loaded');
-                }, 50);
+                });
             });
         });
 
@@ -555,11 +556,10 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
-                    reg.update(); // Έλεγχος για νέο SW στο server
+                    reg.update();
                 }).catch((err) => console.error('SW Error:', err));
             });
 
-            // Όταν ο νέος Service Worker πάρει τον έλεγχο, κάνε ακαριαία ανανέωση τη σελίδα
             let refreshing = false;
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 if (!refreshing) {
