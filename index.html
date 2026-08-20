@@ -647,27 +647,16 @@
         .stats-cocktail-row {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            padding: 12px 14px;
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
-        .stats-cocktail-info {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
         .stats-cocktail-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 600;
-        }
-
-        .stats-cocktail-count {
-            font-size: 11px;
-            color: var(--text-muted);
         }
 
         .stats-cocktail-volume {
@@ -1153,7 +1142,6 @@
                     delete allLogsData[latest.id];
                 }
             } else if (latest.timestamp && db) {
-                // Fallback for logs without ID
                 db.ref('all_logs').orderByChild('timestamp').equalTo(latest.timestamp).once('value', (snapshot) => {
                     snapshot.forEach((child) => {
                         if (child.val().cocktail === currentCocktail) {
@@ -1258,7 +1246,6 @@
                 return;
             }
 
-            // Group logs by YYYY-MM
             const monthsMap = {};
             logsArray.forEach(log => {
                 if (!log.timestamp) return;
@@ -1310,10 +1297,10 @@
             const cocktailStats = {};
             Object.keys(recipes).forEach(key => {
                 cocktailStats[key] = {
+                    key: key,
                     name: recipes[key].name,
                     color: recipes[key].color,
-                    totalMl: 0,
-                    batches: 0
+                    totalMl: 0
                 };
             });
 
@@ -1331,12 +1318,14 @@
                     
                     if (cocktailStats[cKey]) {
                         cocktailStats[cKey].totalMl += vol;
-                        cocktailStats[cKey].batches += 1;
                     }
                     grandTotalMl += vol;
                     totalBatches += 1;
                 }
             });
+
+            // Ταξινόμηση από τη μεγαλύτερη κατανάλωση προς τη μικρότερη
+            const sortedList = Object.values(cocktailStats).sort((a, b) => b.totalMl - a.totalMl);
 
             const formattedGrandTotal = grandTotalMl >= 1000 
                 ? (grandTotalMl / 1000).toFixed(1) + ' lt' 
@@ -1351,25 +1340,20 @@
                 <div class="stat-summary-card">
                     <div>
                         <div class="label">Συνολικη Παραγωγη</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">${totalBatches} καταγραφές</div>
                     </div>
                     <div class="val">${formattedGrandTotal}</div>
                 </div>
 
                 <div class="stats-cocktail-list">
-                    ${Object.keys(cocktailStats).map(key => {
-                        const stat = cocktailStats[key];
+                    ${sortedList.map(stat => {
                         const volDisplay = stat.totalMl >= 1000 
                             ? (stat.totalMl / 1000).toFixed(1) + ' lt' 
                             : stat.totalMl + ' ml';
-                        const opacity = stat.totalMl === 0 ? 'opacity: 0.45;' : '';
+                        const opacity = stat.totalMl === 0 ? 'opacity: 0.4;' : '';
 
                         return `
                             <div class="stats-cocktail-row" style="${opacity}">
-                                <div class="stats-cocktail-info">
-                                    <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
-                                    <span class="stats-cocktail-count">${stat.batches} παρτίδες (${stat.totalMl} ml)</span>
-                                </div>
+                                <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
                                 <div class="stats-cocktail-volume">${volDisplay}</div>
                             </div>
                         `;
