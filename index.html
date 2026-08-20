@@ -27,6 +27,7 @@
             --text-color: #ffffff;
             --text-muted: #8fa196;
             --success-color: #2ed573;
+            --danger-color: #ff4757;
         }
 
         html, body {
@@ -235,42 +236,106 @@
             font-weight: 500;
         }
 
-        .last-prep-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 3px solid var(--accent-color);
-            border-radius: 12px;
-            padding: 12px 14px;
-            margin-top: 18px;
+        /* Premix History Card */
+        .history-section {
+            margin-top: 20px;
+            border-top: 1px solid #25302a;
+            padding-top: 15px;
+        }
+
+        .history-section-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            font-size: 13px;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .last-prep-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .last-prep-title {
+        .history-title {
             font-size: 11px;
             text-transform: uppercase;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            font-weight: 600;
         }
 
-        .last-prep-date {
-            font-size: 14px;
+        .swipe-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            opacity: 0.7;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Swipeable Container */
+        .swipe-item-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: var(--danger-color);
+            touch-action: pan-y;
+        }
+
+        .swipe-delete-bg {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        .swipe-item-content {
+            position: relative;
+            background: rgba(0, 0, 0, 0.45);
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+            transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+        }
+
+        .swipe-item-content.swiped {
+            transform: translateX(-70px);
+        }
+
+        .history-item-date {
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-color);
         }
 
-        .last-prep-vol {
+        .history-item-badge {
+            font-size: 10px;
+            color: var(--accent-color);
+            margin-left: 6px;
+            font-weight: 500;
+        }
+
+        .history-item-vol {
             font-family: 'Fredoka', sans-serif;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--accent-color);
+        }
+
+        .history-empty {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 8px 0;
         }
 
         .ingredients-card {
@@ -356,7 +421,7 @@
             letter-spacing: 0.5px;
         }
 
-        /* Clean Log Button */
+        /* Clean Log Action Button */
         .log-action-btn {
             width: 100%;
             background-color: var(--card-bg);
@@ -376,7 +441,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .log-action-btn:active {
@@ -428,12 +493,15 @@
             <span>1 lt</span>
         </div>
 
-        <div class="last-prep-box" id="lastPrepBox">
-            <div class="last-prep-info">
-                <span class="last-prep-title">🕒 ΤΕΛΕΥΤΑΙΟ PREMIX</span>
-                <span class="last-prep-date" id="lastPrepDate">Συγχρονισμός...</span>
+        <!-- Premix History Section -->
+        <div class="history-section">
+            <div class="history-section-header">
+                <span class="history-title">📜 Premix History</span>
+                <span class="swipe-hint">👈 σύρε για διαγραφή</span>
             </div>
-            <div class="last-prep-vol" id="lastPrepVol">-</div>
+            <div class="history-list" id="historyList">
+                <div class="history-empty">Φόρτωση...</div>
+            </div>
         </div>
     </div>
 
@@ -470,13 +538,13 @@
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
             
-            db.ref('last_premixes').on('value', (snapshot) => {
+            db.ref('premix_history').on('value', (snapshot) => {
                 cloudData = snapshot.val() || {};
-                updateLastPrepUI();
+                renderHistoryUI();
             });
         } catch (e) {
-            console.warn("Firebase fallback:", e);
-            document.getElementById('syncText').innerText = "Local Mode";
+            console.warn("Firebase offline/fallback mode:", e);
+            document.getElementById('syncText').innerText = "Local/Offline Mode";
         }
 
         const recipes = {
@@ -594,7 +662,7 @@
             
             currentCocktail = cocktailKey;
             updateValues();
-            updateLastPrepUI();
+            renderHistoryUI();
         }
 
         function toggleIngInfo(id, event) {
@@ -660,20 +728,102 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        function updateLastPrepUI() {
-            const data = cloudData[currentCocktail];
-            const dateEl = document.getElementById('lastPrepDate');
-            const volEl = document.getElementById('lastPrepVol');
+        // Render History with Swipe-to-Delete
+        function renderHistoryUI() {
+            const container = document.getElementById('historyList');
+            const logs = (cloudData[currentCocktail] && Array.isArray(cloudData[currentCocktail])) 
+                ? cloudData[currentCocktail] 
+                : [];
 
-            if (data && data.date) {
-                dateEl.innerText = data.date;
-                volEl.innerText = data.volume;
+            container.innerHTML = '';
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="history-empty">Δεν υπάρχει καταγεγραμμένο ιστορικό.</div>`;
+                return;
+            }
+
+            logs.forEach((item, index) => {
+                const itemWrapper = document.createElement('div');
+                itemWrapper.className = 'swipe-item-container';
+
+                const badge = index === 0 ? '<span class="history-item-badge">● Νεότερο</span>' : '';
+
+                itemWrapper.innerHTML = `
+                    <div class="swipe-delete-bg" onclick="deleteBatch('${item.id}')">🗑️</div>
+                    <div class="swipe-item-content" id="swipe-content-${item.id}">
+                        <div>
+                            <span class="history-item-date">${item.date}</span>
+                            ${badge}
+                        </div>
+                        <div class="history-item-vol">${item.volume}</div>
+                    </div>
+                `;
+
+                container.appendChild(itemWrapper);
+                attachSwipeListeners(itemWrapper.querySelector('.swipe-item-content'), item.id);
+            });
+        }
+
+        // Touch Gesture handling (Swipe Left)
+        function attachSwipeListeners(element, id) {
+            let startX = 0;
+            let currentX = 0;
+            let isSwiping = false;
+
+            element.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].clientX;
+                isSwiping = true;
+            }, { passive: true });
+
+            element.addEventListener('touchmove', (e) => {
+                if (!isSwiping) return;
+                currentX = e.touches[0].clientX;
+                let diffX = currentX - startX;
+
+                if (diffX < 0 && diffX > -120) {
+                    element.style.transform = `translateX(${diffX}px)`;
+                }
+            }, { passive: true });
+
+            element.addEventListener('touchend', (e) => {
+                if (!isSwiping) return;
+                isSwiping = false;
+                let diffX = currentX - startX;
+
+                element.style.transition = 'transform 0.2s cubic-bezier(0.25, 1, 0.5, 1)';
+
+                if (diffX < -50) {
+                    element.style.transform = 'translateX(-70px)';
+                    if (navigator.vibrate) navigator.vibrate(15);
+                } else {
+                    element.style.transform = 'translateX(0px)';
+                }
+            });
+
+            // Tap elsewhere resets swipe
+            document.addEventListener('touchstart', (e) => {
+                if (!element.contains(e.target)) {
+                    element.style.transform = 'translateX(0px)';
+                }
+            }, { passive: true });
+        }
+
+        // Διαγραφή Log
+        function deleteBatch(logId) {
+            let currentLogs = cloudData[currentCocktail] || [];
+            currentLogs = currentLogs.filter(item => item.id !== logId);
+
+            if (navigator.vibrate) navigator.vibrate([20, 40]);
+
+            if (db) {
+                db.ref('premix_history/' + currentCocktail).set(currentLogs);
             } else {
-                dateEl.innerText = "Δεν έχει καταγραφεί ακόμα";
-                volEl.innerText = "-";
+                cloudData[currentCocktail] = currentLogs;
+                renderHistoryUI();
             }
         }
 
+        // Καταγραφή νέου Premix (Κρατάει τα 3 τελευταία)
         function recordNewBatch() {
             const slider = document.getElementById('premixSlider');
             const sliderValue = parseInt(slider.value);
@@ -687,17 +837,24 @@
             const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
             const fullDateString = `${dateStr} @ ${timeStr}`;
 
-            const batchData = {
+            const newEntry = {
+                id: 'log_' + Date.now(),
                 date: fullDateString,
                 volume: formattedVolume,
                 timestamp: now.getTime()
             };
 
+            let currentLogs = cloudData[currentCocktail] || [];
+            if (!Array.isArray(currentLogs)) currentLogs = [];
+
+            currentLogs.unshift(newEntry); // Νεότερο στην κορυφή
+            if (currentLogs.length > 3) currentLogs = currentLogs.slice(0, 3); // Κράτα μόνο τα 3
+
             if (db) {
-                db.ref('last_premixes/' + currentCocktail).set(batchData);
+                db.ref('premix_history/' + currentCocktail).set(currentLogs);
             } else {
-                cloudData[currentCocktail] = batchData;
-                updateLastPrepUI();
+                cloudData[currentCocktail] = currentLogs;
+                renderHistoryUI();
             }
 
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
