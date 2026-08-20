@@ -588,11 +588,12 @@
 
         .month-btn span.badge {
             font-family: 'Fredoka', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             color: var(--accent-color);
             background: rgba(0, 0, 0, 0.35);
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 20px;
+            font-weight: 700;
         }
 
         .month-detail-header {
@@ -1260,13 +1261,11 @@
                         year: year,
                         month: month,
                         label: `${greekMonths[month]} ${year}`,
-                        totalMl: 0,
-                        count: 0
+                        totalMl: 0
                     };
                 }
                 const vol = log.volume_ml || (log.volume && log.volume.includes('lt') ? 1000 : parseInt(log.volume) || 0);
                 monthsMap[key].totalMl += vol;
-                monthsMap[key].count += 1;
             });
 
             const sortedKeys = Object.keys(monthsMap).sort().reverse();
@@ -1282,7 +1281,7 @@
                         return `
                             <button class="month-btn" onclick="renderMonthDetailView('${m.key}', '${m.label}')">
                                 <span>📅 ${m.label}</span>
-                                <span class="badge">${totalLt} lt (${m.count} logs)</span>
+                                <span class="badge">${totalLt} lt</span>
                             </button>
                         `;
                     }).join('')}
@@ -1305,7 +1304,6 @@
             });
 
             let grandTotalMl = 0;
-            let totalBatches = 0;
 
             logsArray.forEach(log => {
                 if (!log.timestamp) return;
@@ -1320,11 +1318,9 @@
                         cocktailStats[cKey].totalMl += vol;
                     }
                     grandTotalMl += vol;
-                    totalBatches += 1;
                 }
             });
 
-            // Ταξινόμηση από τη μεγαλύτερη κατανάλωση προς τη μικρότερη
             const sortedList = Object.values(cocktailStats).sort((a, b) => b.totalMl - a.totalMl);
 
             const formattedGrandTotal = grandTotalMl >= 1000 
