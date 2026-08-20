@@ -75,6 +75,7 @@
             text-transform: uppercase;
             text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
             transition: color 0.4s ease;
+            cursor: pointer;
         }
 
         .live-status {
@@ -481,12 +482,206 @@
             border-color: var(--success-color);
             color: #0e1310;
         }
+
+        /* Modal / Stats Menu Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background-color: var(--card-bg);
+            border: 1px solid #28372f;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #233028;
+        }
+
+        .modal-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 18px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .month-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .month-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid #27352d;
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .month-btn:active {
+            background: rgba(255, 211, 42, 0.1);
+            border-color: var(--accent-color);
+            transform: scale(0.99);
+        }
+
+        .month-btn span.badge {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13px;
+            color: var(--accent-color);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .month-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: var(--text-color);
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .stat-summary-card {
+            background: rgba(0,0,0,0.3);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-summary-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-summary-card .val {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stats-cocktail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stats-cocktail-row {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .stats-cocktail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .stats-cocktail-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .stats-cocktail-count {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .stats-cocktail-volume {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🗿 Klio Premix 🌴</h1>
+        <h1 id="appTitle">🗿 Klio Premix 🌴</h1>
         <div class="live-status">
             <span class="dot"></span>
             <span id="syncText">Live</span>
@@ -551,6 +746,19 @@
         <span id="logBtnText">Log Premix</span>
     </button>
 
+    <!-- Monthly Stats Modal -->
+    <div class="modal-overlay" id="statsModal" onclick="closeMonthlyStats(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 class="modal-title">📊 Μηνιαία Δεδομένα</h3>
+                <button class="modal-close-btn" onclick="closeMonthlyStats()">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Content injected dynamically -->
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyC3vc6RNdKYjJBtdOSWTtRBcMSgeMgUqBU",
@@ -565,6 +773,7 @@
 
         let db = null;
         let cloudData = {};
+        let allLogsData = {};
 
         try {
             firebase.initializeApp(firebaseConfig);
@@ -574,6 +783,10 @@
                 cloudData = snapshot.val() || {};
                 updateLastPrepUI();
                 updateGlobalWarning();
+            });
+
+            db.ref('all_logs').on('value', (snapshot) => {
+                allLogsData = snapshot.val() || {};
             });
         } catch (e) {
             console.warn("Firebase fallback:", e);
@@ -868,12 +1081,30 @@
             const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
             const fullDateString = `${dateStr} @ ${timeStr}`;
 
+            let logId = 'local_' + Date.now();
+            if (db) {
+                const newLogRef = db.ref('all_logs').push();
+                logId = newLogRef.key;
+            }
+
             const batchData = {
-                date: fullDateString,
+                id: logId,
+                cocktail: currentCocktail,
+                cocktailName: recipes[currentCocktail].name,
+                volume_ml: totalVolume,
                 volume: formattedVolume,
+                date: fullDateString,
                 timestamp: now.getTime()
             };
 
+            // 1. Permanent Log in all_logs
+            if (db) {
+                db.ref('all_logs/' + logId).set(batchData);
+            } else {
+                allLogsData[logId] = batchData;
+            }
+
+            // 2. Recent History in last_premixes
             let history = getHistoryArray(cloudData[currentCocktail]);
             history.unshift(batchData);
             if (history.length > 3) {
@@ -914,6 +1145,25 @@
             
             if (!confirmDelete) return;
 
+            // Remove from permanent all_logs node
+            if (latest.id) {
+                if (db) {
+                    db.ref('all_logs/' + latest.id).remove();
+                } else {
+                    delete allLogsData[latest.id];
+                }
+            } else if (latest.timestamp && db) {
+                // Fallback for logs without ID
+                db.ref('all_logs').orderByChild('timestamp').equalTo(latest.timestamp).once('value', (snapshot) => {
+                    snapshot.forEach((child) => {
+                        if (child.val().cocktail === currentCocktail) {
+                            child.ref.remove();
+                        }
+                    });
+                });
+            }
+
+            // Remove from recent history
             history.shift();
 
             if (db) {
@@ -953,6 +1203,180 @@
         prepBox.addEventListener('mouseup', cancelPress);
         prepBox.addEventListener('mouseleave', cancelPress);
         prepBox.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        /* -------------------------------------------------------------
+           Triple-Tap Header & Monthly Stats Logic
+        ------------------------------------------------------------- */
+        const greekMonths = [
+            'Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 
+            'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 
+            'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'
+        ];
+
+        let tapCount = 0;
+        let tapTimer = null;
+        const titleEl = document.getElementById('appTitle');
+
+        titleEl.addEventListener('click', () => {
+            tapCount++;
+            clearTimeout(tapTimer);
+            if (tapCount === 3) {
+                tapCount = 0;
+                if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+                openMonthlyStats();
+            } else {
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 450);
+            }
+        });
+
+        function openMonthlyStats() {
+            const modal = document.getElementById('statsModal');
+            modal.classList.add('active');
+            renderMonthSelectionView();
+        }
+
+        function closeMonthlyStats(e) {
+            if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) {
+                return;
+            }
+            const modal = document.getElementById('statsModal');
+            modal.classList.remove('active');
+        }
+
+        function renderMonthSelectionView() {
+            const body = document.getElementById('modalBody');
+            const logsArray = Object.values(allLogsData || {});
+
+            if (logsArray.length === 0) {
+                body.innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
+                        <span style="font-size: 32px; display:block; margin-bottom:10px;">📭</span>
+                        Δεν υπάρχουν ακόμη καταγεγραμμένα δεδομένα.
+                    </div>`;
+                return;
+            }
+
+            // Group logs by YYYY-MM
+            const monthsMap = {};
+            logsArray.forEach(log => {
+                if (!log.timestamp) return;
+                const d = new Date(log.timestamp);
+                const year = d.getFullYear();
+                const month = d.getMonth();
+                const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+                
+                if (!monthsMap[key]) {
+                    monthsMap[key] = {
+                        key: key,
+                        year: year,
+                        month: month,
+                        label: `${greekMonths[month]} ${year}`,
+                        totalMl: 0,
+                        count: 0
+                    };
+                }
+                const vol = log.volume_ml || (log.volume && log.volume.includes('lt') ? 1000 : parseInt(log.volume) || 0);
+                monthsMap[key].totalMl += vol;
+                monthsMap[key].count += 1;
+            });
+
+            const sortedKeys = Object.keys(monthsMap).sort().reverse();
+
+            body.innerHTML = `
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+                    Επίλεξε μήνα για αναλυτικά στοιχεία παραγωγής:
+                </div>
+                <div class="month-list">
+                    ${sortedKeys.map(k => {
+                        const m = monthsMap[k];
+                        const totalLt = (m.totalMl / 1000).toFixed(1);
+                        return `
+                            <button class="month-btn" onclick="renderMonthDetailView('${m.key}', '${m.label}')">
+                                <span>📅 ${m.label}</span>
+                                <span class="badge">${totalLt} lt (${m.count} logs)</span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderMonthDetailView(monthKey, monthLabel) {
+            const body = document.getElementById('modalBody');
+            const logsArray = Object.values(allLogsData || {});
+
+            const cocktailStats = {};
+            Object.keys(recipes).forEach(key => {
+                cocktailStats[key] = {
+                    name: recipes[key].name,
+                    color: recipes[key].color,
+                    totalMl: 0,
+                    batches: 0
+                };
+            });
+
+            let grandTotalMl = 0;
+            let totalBatches = 0;
+
+            logsArray.forEach(log => {
+                if (!log.timestamp) return;
+                const d = new Date(log.timestamp);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (key === monthKey) {
+                    const cKey = log.cocktail;
+                    const vol = log.volume_ml || (log.volume && log.volume.includes('lt') ? 1000 : parseInt(log.volume) || 0);
+                    
+                    if (cocktailStats[cKey]) {
+                        cocktailStats[cKey].totalMl += vol;
+                        cocktailStats[cKey].batches += 1;
+                    }
+                    grandTotalMl += vol;
+                    totalBatches += 1;
+                }
+            });
+
+            const formattedGrandTotal = grandTotalMl >= 1000 
+                ? (grandTotalMl / 1000).toFixed(1) + ' lt' 
+                : grandTotalMl + ' ml';
+
+            body.innerHTML = `
+                <div class="month-detail-header">
+                    <button class="back-btn" onclick="renderMonthSelectionView()">← Πίσω</button>
+                    <strong style="font-size: 15px;">${monthLabel}</strong>
+                </div>
+
+                <div class="stat-summary-card">
+                    <div>
+                        <div class="label">Συνολικη Παραγωγη</div>
+                        <div style="font-size: 11px; color: var(--text-muted);">${totalBatches} καταγραφές</div>
+                    </div>
+                    <div class="val">${formattedGrandTotal}</div>
+                </div>
+
+                <div class="stats-cocktail-list">
+                    ${Object.keys(cocktailStats).map(key => {
+                        const stat = cocktailStats[key];
+                        const volDisplay = stat.totalMl >= 1000 
+                            ? (stat.totalMl / 1000).toFixed(1) + ' lt' 
+                            : stat.totalMl + ' ml';
+                        const opacity = stat.totalMl === 0 ? 'opacity: 0.45;' : '';
+
+                        return `
+                            <div class="stats-cocktail-row" style="${opacity}">
+                                <div class="stats-cocktail-info">
+                                    <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
+                                    <span class="stats-cocktail-count">${stat.batches} παρτίδες (${stat.totalMl} ml)</span>
+                                </div>
+                                <div class="stats-cocktail-volume">${volDisplay}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
 
         window.onload = function() {
             updateValues();
