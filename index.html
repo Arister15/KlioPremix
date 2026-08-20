@@ -15,6 +15,10 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
+    <!-- Firebase Realtime Database SDKs (Compat version for inline handlers) -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
     <style>
         :root {
             --bg-color: #0e1310;
@@ -22,6 +26,7 @@
             --accent-color: #ffd32a;
             --text-color: #ffffff;
             --text-muted: #8fa196;
+            --success-color: #2ed573;
         }
 
         html, body {
@@ -46,7 +51,7 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
             opacity: 0;
-            transition: opacity 1s ease-in-out, background-color 0.4s ease;
+            transition: opacity 0.8s ease-in-out, background-color 0.4s ease;
         }
 
         body.loaded {
@@ -55,7 +60,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         header h1 {
@@ -70,6 +75,25 @@
             transition: color 0.4s ease;
         }
 
+        .live-status {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px var(--success-color);
+        }
+
         .section-title {
             font-family: 'Fredoka', sans-serif;
             font-size: 15px;
@@ -78,9 +102,6 @@
             margin-bottom: 12px;
             font-weight: 500;
             letter-spacing: 0.8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .cocktail-selector {
@@ -214,10 +235,49 @@
             font-weight: 500;
         }
 
+        .last-prep-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+        }
+
+        .last-prep-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .last-prep-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .last-prep-date {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .last-prep-vol {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
         .ingredients-card {
             background-color: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
+            margin-bottom: 25px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
@@ -259,12 +319,6 @@
             padding: 2px 4px;
             line-height: 1;
             opacity: 0.85;
-            transition: transform 0.2s ease, opacity 0.2s ease;
-        }
-
-        .info-btn:active {
-            transform: scale(1.2);
-            opacity: 1;
         }
 
         .ingredient-info-box {
@@ -301,12 +355,46 @@
             margin-bottom: 6px;
             letter-spacing: 0.5px;
         }
+
+        .log-action-btn {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: #0e1310;
+            border: none;
+            border-radius: 18px;
+            padding: 18px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .log-action-btn:active {
+            transform: scale(0.97);
+        }
+
+        .log-action-btn.success {
+            background-color: var(--success-color);
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>🗿 Klio Premix 🌴</h1>
+        <div class="live-status">
+            <span class="dot"></span>
+            <span id="syncText">Live Cloud Sync</span>
+        </div>
     </header>
 
     <div class="section-title">🍹 COCKTAIL</div>
@@ -335,6 +423,14 @@
             <span>500ml</span>
             <span>1 lt</span>
         </div>
+
+        <div class="last-prep-box" id="lastPrepBox">
+            <div class="last-prep-info">
+                <span class="last-prep-title">🕒 ΤΕΛΕΥΤΑΙΟ PREMIX</span>
+                <span class="last-prep-date" id="lastPrepDate">Συγχρονισμός...</span>
+            </div>
+            <div class="last-prep-vol" id="lastPrepVol">-</div>
+        </div>
     </div>
 
     <div class="section-title">📋 RECIPE</div>
@@ -346,7 +442,40 @@
         </div>
     </div>
 
+    <button class="log-action-btn" id="logBtn" onclick="recordNewBatch()">
+        <span>✅</span>
+        <span id="logBtnText">ΚΑΤΑΓΡΑΦΗ PREMIX (1 lt)</span>
+    </button>
+
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3vc6RNdKYjJBtdOSWTtRBcMSgeMgUqBU",
+            authDomain: "premix-ccc71.firebaseapp.com",
+            databaseURL: "https://premix-ccc71-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "premix-ccc71",
+            storageBucket: "premix-ccc71.firebasestorage.app",
+            messagingSenderId: "48406470893",
+            appId: "1:48406470893:web:31093471628b14bf0d6ce4",
+            measurementId: "G-T9J9EZNGB2"
+        };
+
+        let db = null;
+        let cloudData = {};
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            
+            db.ref('last_premixes').on('value', (snapshot) => {
+                cloudData = snapshot.val() || {};
+                updateLastPrepUI();
+            });
+        } catch (e) {
+            console.warn("Firebase fallback:", e);
+            document.getElementById('syncText').innerText = "Local Mode";
+        }
+
         const recipes = {
             happy_hawaiian: {
                 name: "Happy Hawaiian",
@@ -462,14 +591,13 @@
             
             currentCocktail = cocktailKey;
             updateValues();
+            updateLastPrepUI();
         }
 
         function toggleIngInfo(id, event) {
             event.stopPropagation();
             const el = document.getElementById(id);
-            if (el) {
-                el.classList.toggle('active');
-            }
+            if (el) el.classList.toggle('active');
         }
 
         function updateValues() {
@@ -478,9 +606,7 @@
             const totalVolume = sliderValue * 100;
             
             if (sliderValue !== lastSliderValue) {
-                if (navigator.vibrate) {
-                    navigator.vibrate(12);
-                }
+                if (navigator.vibrate) navigator.vibrate(12);
                 lastSliderValue = sliderValue;
             }
             
@@ -493,11 +619,9 @@
                 track.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percentage}%, #25302a ${percentage}%, #25302a 100%)`;
             }
 
-            if (totalVolume === 1000) {
-                document.getElementById('volumeDisplay').innerText = "1 lt";
-            } else {
-                document.getElementById('volumeDisplay').innerText = totalVolume + " ml";
-            }
+            const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
+            document.getElementById('volumeDisplay').innerText = formattedVolume;
+            document.getElementById('logBtnText').innerText = `ΚΑΤΑΓΡΑΦΗ PREMIX (${formattedVolume})`;
 
             const listContainer = document.getElementById('ingredientsList');
             listContainer.innerHTML = '';
@@ -534,12 +658,63 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
+        function updateLastPrepUI() {
+            const data = cloudData[currentCocktail];
+            const dateEl = document.getElementById('lastPrepDate');
+            const volEl = document.getElementById('lastPrepVol');
+
+            if (data && data.date) {
+                dateEl.innerText = data.date;
+                volEl.innerText = data.volume;
+            } else {
+                dateEl.innerText = "Δεν έχει καταγραφεί ακόμα";
+                volEl.innerText = "-";
+            }
+        }
+
+        function recordNewBatch() {
+            const slider = document.getElementById('premixSlider');
+            const sliderValue = parseInt(slider.value);
+            if (sliderValue === 0) return;
+
+            const totalVolume = sliderValue * 100;
+            const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
+            const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
+            const fullDateString = `${dateStr} @ ${timeStr}`;
+
+            const batchData = {
+                date: fullDateString,
+                volume: formattedVolume,
+                timestamp: now.getTime()
+            };
+
+            if (db) {
+                db.ref('last_premixes/' + currentCocktail).set(batchData);
+            } else {
+                cloudData[currentCocktail] = batchData;
+                updateLastPrepUI();
+            }
+
+            if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+
+            const btn = document.getElementById('logBtn');
+            const originalText = document.getElementById('logBtnText').innerText;
+            btn.classList.add('success');
+            document.getElementById('logBtnText').innerText = "ΑΠΟΘΗΚΕΥΤΗΚΕ! ✓";
+            setTimeout(() => {
+                btn.classList.remove('success');
+                document.getElementById('logBtnText').innerText = originalText;
+            }, 1000);
+        }
+
         window.onload = function() {
             updateValues();
             document.body.classList.add('loaded');
         }
 
-        // Service Worker Registration με αυτόματο reload όταν ανιχνευθεί νέα έκδοση
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
