@@ -15,7 +15,7 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase Realtime Database SDKs (Compat version for inline handlers) -->
+    <!-- Firebase Realtime Database SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -277,7 +277,7 @@
             background-color: var(--card-bg);
             border-radius: 20px;
             padding: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
@@ -356,34 +356,38 @@
             letter-spacing: 0.5px;
         }
 
+        /* Clean Log Button */
         .log-action-btn {
             width: 100%;
-            background-color: var(--accent-color);
-            color: #0e1310;
-            border: none;
-            border-radius: 18px;
-            padding: 18px;
+            background-color: var(--card-bg);
+            color: var(--accent-color);
+            border: 1.5px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 15px;
             font-family: 'Fredoka', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
-            letter-spacing: 1px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
 
         .log-action-btn:active {
-            transform: scale(0.97);
+            transform: scale(0.98);
+            background-color: rgba(255, 211, 42, 0.1);
         }
 
         .log-action-btn.success {
             background-color: var(--success-color);
-            color: #ffffff;
+            border-color: var(--success-color);
+            color: #0e1310;
         }
     </style>
 </head>
@@ -443,12 +447,11 @@
     </div>
 
     <button class="log-action-btn" id="logBtn" onclick="recordNewBatch()">
-        <span>✅</span>
-        <span id="logBtnText">ΚΑΤΑΓΡΑΦΗ PREMIX (1 lt)</span>
+        <span id="logBtnIcon">📝</span>
+        <span id="logBtnText">Log Premix</span>
     </button>
 
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC3vc6RNdKYjJBtdOSWTtRBcMSgeMgUqBU",
             authDomain: "premix-ccc71.firebaseapp.com",
@@ -621,7 +624,6 @@
 
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             document.getElementById('volumeDisplay').innerText = formattedVolume;
-            document.getElementById('logBtnText').innerText = `ΚΑΤΑΓΡΑΦΗ PREMIX (${formattedVolume})`;
 
             const listContainer = document.getElementById('ingredientsList');
             listContainer.innerHTML = '';
@@ -701,12 +703,17 @@
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
 
             const btn = document.getElementById('logBtn');
-            const originalText = document.getElementById('logBtnText').innerText;
+            const textSpan = document.getElementById('logBtnText');
+            const iconSpan = document.getElementById('logBtnIcon');
+
             btn.classList.add('success');
-            document.getElementById('logBtnText').innerText = "ΑΠΟΘΗΚΕΥΤΗΚΕ! ✓";
+            textSpan.innerText = "Saved ✓";
+            iconSpan.innerText = "";
+
             setTimeout(() => {
                 btn.classList.remove('success');
-                document.getElementById('logBtnText').innerText = originalText;
+                textSpan.innerText = "Log Premix";
+                iconSpan.innerText = "📝";
             }, 1000);
         }
 
