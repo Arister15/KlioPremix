@@ -62,7 +62,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         header h1 {
@@ -94,6 +94,23 @@
             border-radius: 50%;
             display: inline-block;
             box-shadow: 0 0 6px var(--success-color);
+        }
+
+        /* Top Warning Banner */
+        .global-warning-container {
+            display: none;
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid var(--warning-color);
+            border-radius: 14px;
+            padding: 10px 14px;
+            color: #ff6b81;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            animation: pulseWarning 2.2s infinite ease-in-out;
+            text-align: center;
         }
 
         .section-title {
@@ -338,7 +355,6 @@
             color: var(--accent-color);
         }
 
-        /* Older logs styling */
         .history-item:not(:first-child) .history-date {
             color: var(--text-muted);
             font-weight: 400;
@@ -433,7 +449,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Clean Log Button */
         .log-action-btn {
             width: 100%;
             background-color: var(--card-bg);
@@ -477,6 +492,9 @@
             <span id="syncText">Live</span>
         </div>
     </header>
+
+    <!-- Top Warning Banner Container -->
+    <div id="globalWarningContainer" class="global-warning-container"></div>
 
     <div class="section-title">🍹 COCKTAIL</div>
     <div class="cocktail-selector">
@@ -555,6 +573,7 @@
             db.ref('last_premixes').on('value', (snapshot) => {
                 cloudData = snapshot.val() || {};
                 updateLastPrepUI();
+                updateGlobalWarning();
             });
         } catch (e) {
             console.warn("Firebase fallback:", e);
@@ -742,7 +761,6 @@
             document.getElementById('serviceText').innerText = recipe.service;
         }
 
-        // Helper to normalize history data (supports legacy single object & arrays)
         function getHistoryArray(data) {
             if (!data) return [];
             if (Array.isArray(data)) return [...data];
@@ -751,6 +769,33 @@
                 return Object.values(data);
             }
             return [];
+        }
+
+        // Global Warning (> 4 Days Check)
+        function updateGlobalWarning() {
+            const container = document.getElementById('globalWarningContainer');
+            if (!container) return;
+
+            const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            const expiredList = [];
+
+            Object.keys(recipes).forEach(key => {
+                const history = getHistoryArray(cloudData[key]);
+                if (history.length > 0 && history[0].timestamp) {
+                    if (now - history[0].timestamp >= FOUR_DAYS_MS) {
+                        expiredList.push(recipes[key].name);
+                    }
+                }
+            });
+
+            if (expiredList.length > 0) {
+                container.style.display = 'block';
+                container.innerHTML = `⚠️ <strong>Προσοχή premix:</strong> ${expiredList.join(', ')}`;
+            } else {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }
         }
 
         function updateLastPrepUI() {
@@ -769,7 +814,6 @@
                 return;
             }
 
-            // Check if more than 4 days have passed
             const latest = history[0];
             const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
             const now = Date.now();
@@ -841,6 +885,7 @@
             } else {
                 cloudData[currentCocktail] = history;
                 updateLastPrepUI();
+                updateGlobalWarning();
             }
 
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
@@ -869,19 +914,19 @@
             
             if (!confirmDelete) return;
 
-            history.shift(); // Remove newest
+            history.shift();
 
             if (db) {
                 db.ref('last_premixes/' + currentCocktail).set(history);
             } else {
                 cloudData[currentCocktail] = history;
                 updateLastPrepUI();
+                updateGlobalWarning();
             }
 
             if (navigator.vibrate) navigator.vibrate(80);
         }
 
-        // Long Press Handler for History Box
         let pressTimer = null;
         const prepBox = document.getElementById('lastPrepBox');
 
