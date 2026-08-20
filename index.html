@@ -974,19 +974,20 @@
             return [];
         }
 
-        // Global Warning (> 4 Days Check)
+        // Global Warning Check (15 days for Negroni, 4 days for others)
         function updateGlobalWarning() {
             const container = document.getElementById('globalWarningContainer');
             if (!container) return;
 
-            const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
             const now = Date.now();
             const expiredList = [];
 
             Object.keys(recipes).forEach(key => {
                 const history = getHistoryArray(cloudData[key]);
                 if (history.length > 0 && history[0].timestamp) {
-                    if (now - history[0].timestamp >= FOUR_DAYS_MS) {
+                    const limitDays = key === 'negroni' ? 15 : 4;
+                    const limitMs = limitDays * 24 * 60 * 60 * 1000;
+                    if (now - history[0].timestamp >= limitMs) {
                         expiredList.push(recipes[key].name);
                     }
                 }
@@ -1018,7 +1019,8 @@
             }
 
             const latest = history[0];
-            const FOUR_DAYS_MS = 4 * 24 * 60 * 60 * 1000;
+            const limitDays = currentCocktail === 'negroni' ? 15 : 4;
+            const thresholdMs = limitDays * 24 * 60 * 60 * 1000;
             const now = Date.now();
             
             let isExpired = false;
@@ -1026,7 +1028,7 @@
 
             if (latest.timestamp) {
                 const diff = now - latest.timestamp;
-                if (diff >= FOUR_DAYS_MS) {
+                if (diff >= thresholdMs) {
                     isExpired = true;
                     daysPassed = Math.floor(diff / (24 * 60 * 60 * 1000));
                 }
