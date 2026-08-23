@@ -1065,6 +1065,24 @@
             const sliderValue = parseInt(slider.value);
             if (sliderValue === 0) return;
 
+            // Έλεγχος αν καταχωρήθηκε πρόσφατα (εντός 10 λεπτών)
+            const history = getHistoryArray(cloudData[currentCocktail]);
+            if (history.length > 0 && history[0].timestamp) {
+                const nowMs = Date.now();
+                const diffMs = nowMs - history[0].timestamp;
+                const tenMinutesMs = 10 * 60 * 1000;
+
+                if (diffMs >= 0 && diffMs < tenMinutesMs) {
+                    const diffMinutes = Math.floor(diffMs / (60 * 1000));
+                    const cocktailName = recipes[currentCocktail].name;
+                    const confirmMsg = `Καταχωρήθηκε ήδη 1 premix (${cocktailName}) πριν από ${diffMinutes} λεπτά, είσαι σίγουρος ότι θέλεις να δημιουργηθεί νέα καταχώριση;`;
+                    
+                    if (!confirm(confirmMsg)) {
+                        return;
+                    }
+                }
+            }
+
             const totalVolume = sliderValue * 100;
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             
@@ -1097,16 +1115,16 @@
             }
 
             // 2. Recent History in last_premixes
-            let history = getHistoryArray(cloudData[currentCocktail]);
-            history.unshift(batchData);
-            if (history.length > 3) {
-                history = history.slice(0, 3);
+            let updatedHistory = getHistoryArray(cloudData[currentCocktail]);
+            updatedHistory.unshift(batchData);
+            if (updatedHistory.length > 3) {
+                updatedHistory = updatedHistory.slice(0, 3);
             }
 
             if (db) {
-                db.ref('last_premixes/' + currentCocktail).set(history);
+                db.ref('last_premixes/' + currentCocktail).set(updatedHistory);
             } else {
-                cloudData[currentCocktail] = history;
+                cloudData[currentCocktail] = updatedHistory;
                 updateLastPrepUI();
                 updateGlobalWarning();
             }
