@@ -1079,7 +1079,7 @@
                         ? "μόλις τώρα" 
                         : (diffMinutes === 1 ? "πριν από 1 λεπτό" : `πριν από ${diffMinutes} λεπτά`);
 
-                    const confirmMsg = `⚠️ Πρόσφατη Καταχώριση\n\nΥπάρχει ήδη καταχώριση για "${cocktailName}" ${timeText}.\n\nΣυνέχεια με δημιουργία νέου premix;`;
+                    const confirmMsg = `⚠️ Πρόσφατη Καταχώριση\n\nΥπάρχει ήδη καταχώριση για ${cocktailName} ${timeText}.\n\nΣυνέχεια με δημιουργία νέου premix;`;
                     
                     if (!confirm(confirmMsg)) {
                         return;
