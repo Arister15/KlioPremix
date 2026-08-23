@@ -95,6 +95,12 @@
             border-radius: 50%;
             display: inline-block;
             box-shadow: 0 0 6px var(--success-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dot.offline {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 6px var(--warning-color);
         }
 
         /* Top Warning Banner */
@@ -673,7 +679,7 @@
     <header>
         <h1 id="appTitle">🗿 Klio Premix 🌴</h1>
         <div class="live-status">
-            <span class="dot"></span>
+            <span class="dot" id="syncDot"></span>
             <span id="syncText">Live</span>
         </div>
     </header>
@@ -781,6 +787,90 @@
         } catch (e) {
             console.warn("Firebase fallback:", e);
             document.getElementById('syncText').innerText = "Local Mode";
+        }
+
+        /* -------------------------------------------------------------
+           Offline Queue & Sync Logic
+        ------------------------------------------------------------- */
+        function getOfflineQueue() {
+            try {
+                return JSON.parse(localStorage.getItem('klio_offline_queue') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function saveOfflineQueue(queue) {
+            localStorage.setItem('klio_offline_queue', JSON.stringify(queue));
+        }
+
+        let isSyncing = false;
+        async function syncOfflineQueue() {
+            if (!navigator.onLine || !db || isSyncing) return;
+            
+            const queue = getOfflineQueue();
+            if (queue.length === 0) return;
+
+            isSyncing = true;
+            const remaining = [];
+            
+            for (const item of queue) {
+                try {
+                    // 1. Εγγραφή στο all_logs με το αρχικό timestamp
+                    await db.ref('all_logs/' + item.id).set(item);
+
+                    // 2. Ενημέρωση του πρόσφατου ιστορικού last_premixes
+                    const snap = await db.ref('last_premixes/' + item.cocktail).once('value');
+                    let currentHistory = getHistoryArray(snap.val());
+                    
+                    if (!currentHistory.some(h => h.id === item.id)) {
+                        currentHistory.unshift(item);
+                        // Ταξινόμηση ώστε να μπει στη σωστή χρονολογική σειρά
+                        currentHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                        await db.ref('last_premixes/' + item.cocktail).set(currentHistory.slice(0, 3));
+                    }
+                } catch (err) {
+                    console.error("Σφάλμα συγχρονισμού offline log:", item, err);
+                    remaining.push(item);
+                }
+            }
+
+            saveOfflineQueue(remaining);
+            isSyncing = false;
+        }
+
+        // Ακροατές κατάστασης σύνδεσης
+        window.addEventListener('online', () => {
+            updateConnectionStatus(true);
+            syncOfflineQueue();
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
+        });
+
+        if (db) {
+            db.ref('.info/connected').on('value', (snap) => {
+                const isOnline = snap.val() === true;
+                updateConnectionStatus(isOnline);
+                if (isOnline) {
+                    syncOfflineQueue();
+                }
+            });
+        }
+
+        function updateConnectionStatus(isOnline) {
+            const syncText = document.getElementById('syncText');
+            const syncDot = document.getElementById('syncDot');
+            if (!syncText || !syncDot) return;
+
+            if (isOnline) {
+                syncText.innerText = "Live";
+                syncDot.classList.remove('offline');
+            } else {
+                syncText.innerText = "Offline";
+                syncDot.classList.add('offline');
+            }
         }
 
         const recipes = {
@@ -1090,16 +1180,13 @@
             const totalVolume = sliderValue * 100;
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             
+            // Κλείδωμα αρχικού χρόνου κατά το πάτημα του κουμπιού
             const now = new Date();
             const dateStr = now.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
             const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
             const fullDateString = `${dateStr} @ ${timeStr}`;
 
-            let logId = 'local_' + Date.now();
-            if (db) {
-                const newLogRef = db.ref('all_logs').push();
-                logId = newLogRef.key;
-            }
+            let logId = (db ? db.ref('all_logs').push().key : null) || ('local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
 
             const batchData = {
                 id: logId,
@@ -1111,26 +1198,26 @@
                 timestamp: now.getTime()
             };
 
-            // 1. Permanent Log in all_logs
-            if (db) {
-                db.ref('all_logs/' + logId).set(batchData);
-            } else {
-                allLogsData[logId] = batchData;
-            }
+            // 1. Άμεση ενημέρωση τοπικών δεδομένων UI
+            allLogsData[logId] = batchData;
 
-            // 2. Recent History in last_premixes
             let updatedHistory = getHistoryArray(cloudData[currentCocktail]);
             updatedHistory.unshift(batchData);
             if (updatedHistory.length > 3) {
                 updatedHistory = updatedHistory.slice(0, 3);
             }
+            cloudData[currentCocktail] = updatedHistory;
 
-            if (db) {
-                db.ref('last_premixes/' + currentCocktail).set(updatedHistory);
-            } else {
-                cloudData[currentCocktail] = updatedHistory;
-                updateLastPrepUI();
-                updateGlobalWarning();
+            updateLastPrepUI();
+            updateGlobalWarning();
+
+            // 2. Αποθήκευση στην Offline Queue & Συγχρονισμός
+            const queue = getOfflineQueue();
+            queue.push(batchData);
+            saveOfflineQueue(queue);
+
+            if (navigator.onLine && db) {
+                syncOfflineQueue();
             }
 
             if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
@@ -1140,7 +1227,7 @@
             const iconSpan = document.getElementById('logBtnIcon');
 
             btn.classList.add('success');
-            textSpan.innerText = "Saved ✓";
+            textSpan.innerText = navigator.onLine ? "Saved ✓" : "Saved (Offline) ✓";
             iconSpan.innerText = "";
 
             setTimeout(() => {
@@ -1159,14 +1246,20 @@
             
             if (!confirmDelete) return;
 
+            // Αφαίρεση από Offline Queue εάν υπήρχε εκεί
+            if (latest.id) {
+                const queue = getOfflineQueue();
+                const filteredQueue = queue.filter(q => q.id !== latest.id);
+                saveOfflineQueue(filteredQueue);
+            }
+
             // Remove from permanent all_logs node
             if (latest.id) {
-                if (db) {
+                if (db && navigator.onLine) {
                     db.ref('all_logs/' + latest.id).remove();
-                } else {
-                    delete allLogsData[latest.id];
                 }
-            } else if (latest.timestamp && db) {
+                delete allLogsData[latest.id];
+            } else if (latest.timestamp && db && navigator.onLine) {
                 db.ref('all_logs').orderByChild('timestamp').equalTo(latest.timestamp).once('value', (snapshot) => {
                     snapshot.forEach((child) => {
                         if (child.val().cocktail === currentCocktail) {
@@ -1179,13 +1272,12 @@
             // Remove from recent history
             history.shift();
 
-            if (db) {
+            if (db && navigator.onLine) {
                 db.ref('last_premixes/' + currentCocktail).set(history);
-            } else {
-                cloudData[currentCocktail] = history;
-                updateLastPrepUI();
-                updateGlobalWarning();
             }
+            cloudData[currentCocktail] = history;
+            updateLastPrepUI();
+            updateGlobalWarning();
 
             if (navigator.vibrate) navigator.vibrate(80);
         }
@@ -1385,6 +1477,7 @@
         window.onload = function() {
             updateValues();
             document.body.classList.add('loaded');
+            syncOfflineQueue();
         }
 
         if ('serviceWorker' in navigator) {
