@@ -2,943 +2,1499 @@
 <html lang="el">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="GYM">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#000000">
-    <meta name="color-scheme" content="dark">
-    <link rel="manifest" href="manifest.json">
-    <title>GYM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KLIO PREMIX</title>
     
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="KLIO PREMIX">
+    
+    <link rel="apple-touch-icon" href="images.png">
+    <link rel="icon" type="image/png" href="images.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase Realtime Database SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
     <style>
-        /* --- ULTRA MODERN iOS THEME (Red/Black/Charcoal) --- */
         :root {
-            --bg-main: #000000;
-            --bg-secondary: #121212;
-            --card-bg-top: #1F1F21;
-            --card-bg-bottom: #18181A;
-            --card-border: rgba(255, 255, 255, 0.08);
-            --text-main: #FFFFFF;
-            --text-sec: #98989E;
-            --accent-red: #E62E25;
-            --accent-red-glow: rgba(230, 46, 37, 0.3);
-            --btn-neutral: #2C2C2E;
-            --btn-danger: #FF3B30;
-            --font-stack: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            color-scheme: dark;
+            --bg-color: #0e1310;
+            --card-bg: #171e1a;
+            --accent-color: #ffd32a;
+            --text-color: #ffffff;
+            --text-muted: #8fa196;
+            --success-color: #2ed573;
+            --warning-color: #ff4757;
         }
 
-        /* ΑΠΟΚΛΕΙΣΜΟΣ SCROLLBARS & ΒΕΛΤΙΣΤΟΠΟΙΗΣΗ RENDER */
-        *, *::before, *::after {
+        html, body {
             scrollbar-width: none !important;
             -ms-overflow-style: none !important;
-            box-sizing: border-box;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
-        *::-webkit-scrollbar {
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
             display: none !important;
             width: 0 !important;
             height: 0 !important;
+            background: transparent !important;
         }
 
-        /* ΔΙΟΡΘΩΣΗ VIEWPORT & ΕΞΑΦΑΝΙΣΗ ΛΕΥΚΟΥ ΚΕΝΟΥ iOS */
-        html {
-            background-color: #000000 !important;
-            min-height: 100%;
-            min-height: -webkit-fill-available;
-            overscroll-behavior: none;
-        }
-        
         body {
-            min-height: 100vh;
-            min-height: -webkit-fill-available;
-            background: #000000 !important;
-            background-color: #000000 !important;
-            color: var(--text-main);
-            font-family: var(--font-stack);
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 20px 20px calc(120px + env(safe-area-inset-bottom)) 20px;
+            padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out, background-color 0.4s ease;
         }
 
-        /* ΕΞΑΣΦΑΛΙΣΗ ΕΝΙΑΙΑΣ ΓΡΑΜΜΑΤΟΣΕΙΡΑΣ ΣΕ ΟΛΑ ΤΑ CONTROLS */
-        button, input, textarea, select {
-            font-family: var(--font-stack) !important;
+        body.loaded {
+            opacity: 1;
         }
 
-        body.modal-open {
-            overflow: hidden !important;
-            touch-action: none;
+        header {
+            text-align: center;
+            margin-bottom: 12px;
         }
 
-        .header-top {
+        header h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent-color);
+            margin: 0;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            transition: color 0.4s ease;
+            cursor: pointer;
+        }
+
+        .live-status {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 6px var(--success-color);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dot.offline {
+            background-color: var(--warning-color);
+            box-shadow: 0 0 6px var(--warning-color);
+        }
+
+        /* Top Warning Banner */
+        .global-warning-container {
+            display: none;
+            background: rgba(255, 71, 87, 0.15);
+            border: 1px solid var(--warning-color);
+            border-radius: 14px;
+            padding: 10px 14px;
+            color: #ff6b81;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 14px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            animation: pulseWarning 2.2s infinite ease-in-out;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 15px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 500;
+            letter-spacing: 0.8px;
+        }
+
+        .cocktail-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .cocktail-btn {
+            background-color: var(--card-bg);
+            border: 2px solid transparent;
+            border-radius: 16px;
+            padding: 14px 8px;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            word-wrap: break-word;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+        }
+
+        .cocktail-btn.active {
+            border-color: var(--accent-color);
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--accent-color);
+            transform: scale(1.02);
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .slider-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 30px 0 15px 0;
+            margin-bottom: 15px;
         }
 
-        h1 {
-            font-family: var(--font-stack);
-            font-size: 38px;
-            font-weight: 900;
-            margin: 0;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #fff, #d0d0d0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .volume-display {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent-color);
+            transition: color 0.4s ease;
         }
 
-        #settingsBtn {
-            background: rgba(44, 44, 46, 0.5);
-            color: var(--text-main);
-            width: 44px;
+        .slider-wrapper {
+            position: relative;
+            width: 100%;
             height: 44px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            border-radius: 50%;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            transition: background 0.2s;
-        }
-        #settingsBtn:active { background: rgba(60, 60, 64, 0.8); }
-
-        .progress-container { margin-bottom: 35px; }
-        .progress-bar-bg {
-            background-color: var(--btn-neutral);
-            border-radius: 20px;
-            height: 16px;
-            width: 100%;
-            overflow: hidden;
-            margin-bottom: 10px;
-            border: 1px solid var(--card-border);
-        }
-        .progress-bar-fill {
-            background-color: var(--accent-red);
-            height: 100%;
-            width: 0%;
-            border-radius: 20px;
-            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-            box-shadow: 0 0 12px var(--accent-red-glow);
-        }
-        .progress-text {
-            color: var(--text-sec);
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+            margin: 10px 0;
         }
 
-        #exerciseList {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        .slider-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10px;
+            border-radius: 5px;
+            background: #25302a;
+            pointer-events: none;
         }
 
-        .card {
-            background: linear-gradient(to bottom, var(--card-bg-top), var(--card-bg-bottom));
-            border: 1px solid var(--card-border);
-            border-radius: 22px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            gap: 16px;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .slider-input {
+            -webkit-appearance: none;
+            appearance: none;
+            width: calc(100% + 44px) !important;
+            margin: 0 -22px !important;
+            background: transparent !important;
+            height: 44px;
+            outline: none;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 44px;
+            height: 44px;
+            background-color: transparent !important;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><text y="34" x="22" font-size="34" text-anchor="middle">🧪</text></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            outline: none !important;
+            transition: transform 0.1s ease;
         }
         
-        .card-top {
+        .slider-input::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+        }
+
+        .slider-input::-moz-range-thumb {
+            width: 44px;
+            height: 44px;
+            background-color: transparent !important;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><text y="34" x="22" font-size="34" text-anchor="middle">🧪</text></svg>') !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 0 2px;
+            font-weight: 500;
+        }
+
+        /* Premix History Container */
+        .last-prep-box {
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-top: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            touch-action: pan-y;
+        }
+
+        .last-prep-box.expired {
+            border-left-color: var(--warning-color);
+            background: rgba(255, 71, 87, 0.08);
+        }
+
+        .last-prep-box:active {
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        .last-prep-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            width: 100%;
+            margin-bottom: 2px;
         }
-        
-        .card.completed {
-            background: linear-gradient(to bottom, #161618, #0f0f11);
-            border-color: rgba(230, 46, 37, 0.2);
+
+        .last-prep-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
-        
-        .card-left { flex: 1; }
-        
-        .exercise-name {
-            font-size: 19px;
-            font-weight: 700;
-            margin-bottom: 6px;
+
+        .last-prep-hint {
+            font-size: 10px;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        /* Warning Banner Styles */
+        .history-warning-banner {
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: color 0.3s;
-        }
-        .card.completed .exercise-name { color: var(--accent-red); }
-
-        .checkmark { display: none; color: var(--accent-red); }
-        .card.completed .checkmark { display: inline-block; }
-        
-        .exercise-status {
-            color: var(--text-sec);
-            font-size: 15px;
-            font-weight: 500;
-        }
-        .card.completed .exercise-status {
-            color: var(--accent-red);
-            opacity: 0.8;
-        }
-        .card-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
+            background: rgba(255, 71, 87, 0.18);
+            border: 1px solid rgba(255, 71, 87, 0.45);
+            color: #ff6b81;
+            padding: 7px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            animation: pulseWarning 2.2s infinite ease-in-out;
         }
 
-        button {
-            border: none;
-            outline: none;
-            cursor: pointer;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .circle-btn {
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-weight: bold;
-            transition: transform 0.1s, background 0.2s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        .circle-btn:active { transform: scale(0.92); }
-
-        .btn-minus { 
-            background-color: var(--btn-neutral); 
-            width: 38px; height: 38px;
-            font-size: 20px;
-        }
-        .btn-plus { 
-            background: linear-gradient(135deg, var(--accent-red), #c01d15);
-            width: 48px; height: 48px;
-            font-size: 26px;
-            box-shadow: 0 4px 10px var(--accent-red-glow);
-        }
-        
-        .card.completed .btn-plus {
-             background: var(--btn-neutral);
-             box-shadow: none;
-             opacity: 0.5;
+        @keyframes pulseWarning {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
         }
 
-        .tracker-container {
-            border-top: 1px solid var(--card-border);
-            padding-top: 16px;
+        .history-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 5px;
         }
-        .tracker-row {
+
+        .history-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 2px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
         }
-        .tracker-label {
-            color: var(--text-sec);
-            font-size: 14px;
-            width: 45px;
-            font-weight: 500;
+
+        .history-item:last-child {
+            border-bottom: none;
         }
-        .tracker-input {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid var(--card-border);
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            font-size: 15px;
-            text-align: center;
-            flex: 1;
-            min-width: 0;
-            transition: border-color 0.2s;
-        }
-        .tracker-input:focus { border-color: var(--accent-red); }
-        .tracker-input::placeholder { color: rgba(152, 152, 158, 0.4); }
-        
-        .tracker-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        .tracker-btn {
-            background: var(--btn-neutral);
-            color: var(--text-sec);
-            border-radius: 8px;
-            padding: 6px 14px;
+
+        .history-date {
             font-size: 13px;
             font-weight: 600;
-        }
-        .tracker-btn:active { opacity: 0.7; }
-
-        #resetBtn {
-            position: fixed;
-            bottom: calc(25px + env(safe-area-inset-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(135deg, var(--btn-danger), #d62d24);
-            color: white;
-            border-radius: 30px;
-            padding: 16px 32px;
-            font-size: 17px;
-            font-weight: 700;
-            width: calc(100% - 60px);
-            max-width: 380px;
-            z-index: 10;
-            box-shadow: 0 5px 15px rgba(255, 59, 48, 0.3);
-            transition: transform 0.1s;
-        }
-        #resetBtn:active { transform: translateX(-50%) scale(0.96); }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 100;
-            justify-content: center;
+            color: var(--text-color);
+            display: flex;
             align-items: center;
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
         }
 
-        .modal-content {
-            background: rgba(28, 28, 30, 0.85);
-            border: 1px solid var(--card-border);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            width: 90%;
-            max-width: 400px;
-            max-height: 85vh;
-            border-radius: 26px;
-            padding: 24px;
+        .history-vol {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .history-item:not(:first-child) .history-date {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 12px;
+        }
+
+        .history-item:not(:first-child) .history-vol {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .ingredients-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .ingredient-item {
+            border-bottom: 1px solid #25302a;
+            padding: 14px 0;
+        }
+
+        .ingredient-item:last-child {
+            border-bottom: none;
+        }
+
+        .ingredient-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+        }
+
+        .ing-name {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+
+        .ing-amount {
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            color: var(--accent-color);
+            transition: color 0.4s ease;
+        }
+
+        .info-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 6px;
+            padding: 2px 4px;
+            line-height: 1;
+            opacity: 0.85;
+        }
+
+        .ingredient-info-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.25);
+            border-left: 3px solid var(--accent-color);
+            padding: 10px 14px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #dcdde1;
+            line-height: 1.6;
+        }
+
+        .ingredient-info-box.active {
+            display: block;
+        }
+
+        .service-info {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px dashed #25302a;
+            font-size: 14px;
+            color: #4cd137;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        
+        .service-info span {
+            color: var(--text-muted);
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .log-action-btn {
+            width: 100%;
+            background-color: var(--card-bg);
+            color: var(--accent-color);
+            border: 1.5px solid var(--accent-color);
+            border-radius: 16px;
+            padding: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .log-action-btn:active {
+            transform: scale(0.98);
+            background-color: rgba(255, 211, 42, 0.1);
+        }
+
+        .log-action-btn.success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: #0e1310;
+        }
+
+        /* Modal / Stats Menu Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.82);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background-color: var(--card-bg);
+            border: 1px solid #28372f;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 440px;
+            max-height: 80vh;
             display: flex;
             flex-direction: column;
-            gap: 18px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+            animation: modalFadeIn 0.25s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-header {
+            padding: 18px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            border-bottom: 1px solid #233028;
         }
-        .modal-header h2 { margin: 0; font-size: 26px; font-weight: 800; }
-        .close-btn {
-            background: var(--btn-neutral);
-            color: var(--text-sec);
-            border-radius: 50%;
-            width: 32px; height: 32px;
+
+        .modal-title {
+            font-family: 'Fredoka', sans-serif;
             font-size: 18px;
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        input {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--card-border);
-            color: white;
-            padding: 16px;
-            border-radius: 14px;
-            font-size: 17px;
-            outline: none;
-            width: 100%;
-            transition: border-color 0.2s;
-        }
-        input:focus { border-color: var(--accent-red); }
-        input::placeholder { color: var(--text-sec); }
-
-        .add-group { display: flex; gap: 12px; width: 100%; }
-        .add-group input[type="text"] { flex: 2; min-width: 0; }
-        .add-group input[type="number"] { flex: 1; min-width: 0; }
-
-        .action-btn {
-            background: linear-gradient(135deg, var(--accent-red), #c01d15);
-            color: white;
-            border-radius: 14px;
-            padding: 16px;
-            font-size: 17px;
             font-weight: 700;
-            text-align: center;
+            color: var(--accent-color);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 18px 20px;
+            overflow-y: auto;
             flex: 1;
-            box-shadow: 0 4px 12px var(--accent-red-glow);
         }
-        .action-btn:active { transform: scale(0.97); }
-        
-        .action-btn.cancel { 
-            background: var(--btn-neutral); 
-            color: var(--text-main);
-            box-shadow: none;
-        }
-        .action-btn.danger { background: var(--btn-danger); box-shadow: none; }
 
-        .modal-actions { display: flex; gap: 12px; margin-top: 15px; }
-
-        .settings-list {
+        .month-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            overflow-y: auto;
-            margin-top: 15px;
-            padding-bottom: 20px;
-            touch-action: pan-y;
-            overscroll-behavior: contain;
+            gap: 10px;
         }
-        .set-item {
-            background: rgba(44, 44, 46, 0.6);
-            padding: 14px 18px;
-            border-radius: 16px;
+
+        .month-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid #27352d;
+            border-radius: 14px;
+            padding: 14px 16px;
+            color: var(--text-color);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--card-border);
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            transition: transform 0.15s ease, background 0.2s, border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .set-item.dragging {
-            opacity: 0.8;
-            transform: scale(1.02);
-            border-color: var(--accent-red);
-            background: rgba(60, 60, 64, 0.9);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
-            z-index: 10;
-            pointer-events: none;
+        .month-btn:active {
+            background: rgba(255, 211, 42, 0.1);
+            border-color: var(--accent-color);
+            transform: scale(0.99);
         }
-        .set-item-info { flex: 1; }
-        .set-item-name { font-weight: 700; font-size: 16px; }
-        .set-item-goal { color: var(--text-sec); font-size: 14px; margin-top: 3px; }
-        
-        .set-item-actions { display: flex; gap: 10px; }
-        .set-item-actions button {
-            width: 38px; height: 38px;
+
+        .month-btn span.badge {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 14px;
+            color: var(--accent-color);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .month-detail-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: var(--text-color);
             border-radius: 10px;
-            color: white; font-size: 18px;
-            display: flex; justify-content: center; align-items: center;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
         }
-        .btn-edit { background: var(--btn-neutral); color: var(--text-main); }
-        .btn-del { background: rgba(255, 59, 48, 0.2); color: var(--btn-danger); }
+
+        .stat-summary-card {
+            background: rgba(0,0,0,0.3);
+            border-left: 3px solid var(--accent-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-summary-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .stat-summary-card .val {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stats-cocktail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stats-cocktail-row {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .stats-cocktail-name {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .stats-cocktail-volume {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-top">
-            <h1>GYM</h1>
-            <button id="settingsBtn" onclick="openSettings()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="3"></circle>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                </svg>
-            </button>
-        </div>
-        <div class="progress-container">
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progressFill"></div>
-            </div>
-            <div class="progress-text" id="progressText">0% weekly volume.</div>
+        <h1 id="appTitle">🗿 Klio Premix 🌴</h1>
+        <div class="live-status">
+            <span class="dot" id="syncDot"></span>
+            <span id="syncText">Online</span>
         </div>
     </header>
 
-    <main id="exerciseList"></main>
+    <!-- Top Warning Banner Container -->
+    <div id="globalWarningContainer" class="global-warning-container"></div>
 
-    <button id="resetBtn" onclick="resetWeek()">Reset Week</button>
+    <div class="section-title">🍹 COCKTAIL</div>
+    <div class="cocktail-selector">
+        <button class="cocktail-btn active" onclick="selectCocktail('happy_hawaiian', this)">🌴 Happy Hawaiian</button>
+        <button class="cocktail-btn" onclick="selectCocktail('three_birds', this)">🦜 Three Little Birds</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_tijuana', this)">🌵 Tiki in Tijuana</button>
+        <button class="cocktail-btn" onclick="selectCocktail('mama_africa', this)">🌍 Mama Africa</button>
+        <button class="cocktail-btn" onclick="selectCocktail('kyoto', this)">🌸 Kyoto</button>
+        <button class="cocktail-btn" onclick="selectCocktail('tiki_zombie', this)">🧟 Tiki Zombie</button>
+        <button class="cocktail-btn" onclick="selectCocktail('bahama_mama', this)">🥥 Bahama Mama</button>
+        <button class="cocktail-btn" onclick="selectCocktail('negroni', this)">🍊 Negroni</button>
+    </div>
 
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Settings</h2>
-                <button onclick="closeSettings()" class="close-btn">✕</button>
+    <div class="slider-container">
+        <div class="slider-header">
+            <span class="section-title" style="margin:0;">🧪 PREMIX AMOUNT</span>
+            <div class="volume-display" id="volumeDisplay">1 lt</div>
+        </div>
+        <div class="slider-wrapper">
+            <div class="slider-track" id="sliderTrack"></div>
+            <input type="range" min="0" max="10" value="10" class="slider-input" id="premixSlider" oninput="updateValues()">
+        </div>
+        <div class="slider-labels">
+            <span>0ml</span>
+            <span>500ml</span>
+            <span>1 lt</span>
+        </div>
+
+        <div class="last-prep-box" id="lastPrepBox">
+            <div class="last-prep-header">
+                <span class="last-prep-title">🕒 Premix History</span>
+                <span class="last-prep-hint">(Hold to delete latest)</span>
             </div>
-            
-            <div class="add-group">
-                <input type="text" id="newExName" placeholder="New exercise...">
-                <input type="number" id="newExGoal" placeholder="Sets" min="1">
+            <div class="history-list" id="historyList">
+                <div class="history-item">
+                    <span class="history-date" style="color:var(--text-muted)">Συγχρονισμός...</span>
+                    <span class="history-vol">-</span>
+                </div>
             </div>
-            <button onclick="addExercise()" class="action-btn" style="margin-top: 10px;">Add to Routine</button>
-
-            <div class="settings-list" id="settingsExerciseList"></div>
         </div>
     </div>
 
-    <div id="editModal" class="modal">
-        <div class="modal-content">
+    <div class="section-title">📋 RECIPE</div>
+    <div class="ingredients-card">
+        <div id="ingredientsList"></div>
+        <div class="service-info" id="serviceContainer">
+            <span>💡 Service:</span>
+            <div id="serviceText"></div>
+        </div>
+    </div>
+
+    <button class="log-action-btn" id="logBtn" onclick="recordNewBatch()">
+        <span id="logBtnIcon">📝</span>
+        <span id="logBtnText">Log Premix</span>
+    </button>
+
+    <!-- Monthly Stats Modal -->
+    <div class="modal-overlay" id="statsModal" onclick="closeMonthlyStats(event)">
+        <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
-                <h2>Edit Exercise</h2>
+                <h3 class="modal-title">📊 Μηνιαία Δεδομένα</h3>
+                <button class="modal-close-btn" onclick="closeMonthlyStats()">✕</button>
             </div>
-            <input type="hidden" id="editExId">
-            <label style="font-weight: 600; margin-bottom: -10px;">Name</label>
-            <input type="text" id="editExName" placeholder="Exercise Name">
-            <label style="font-weight: 600; margin-bottom: -10px; margin-top: 10px;">Weekly Goal</label>
-            <input type="number" id="editExGoal" placeholder="Total Sets Goal" min="1">
-            
-            <div class="modal-actions">
-                <button onclick="closeEditModal()" class="action-btn cancel">Cancel</button>
-                <button onclick="saveEdit()" class="action-btn">Save Changes</button>
+            <div class="modal-body" id="modalBody">
+                <!-- Content injected dynamically -->
             </div>
         </div>
     </div>
 
     <script>
-        /* --- CORE DATA & LOGIC --- */
-        const initialExercises = [
-            { id: 1, name: "Flat Press", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 2, name: "Incline Press", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 3, name: "Shoulder Press", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 4, name: "Seated Row", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 5, name: "Lat Pulldown", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 6, name: "Lateral Raises", goal: 7, remaining: 7, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 7, name: "Rear Delts", goal: 4, remaining: 4, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 8, name: "Tricep (Overhead)", goal: 3, remaining: 3, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 9, name: "Tricep Extension", goal: 2, remaining: 2, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 10, name: "Biceps", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 11, name: "Shrugs", goal: 3, remaining: 3, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 12, name: "Leg Press", goal: 5, remaining: 5, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 13, name: "Leg Extension", goal: 2, remaining: 2, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 14, name: "Leg Curl", goal: 6, remaining: 6, logs: [{w:'', r:''}, {w:'', r:''}] },
-            { id: 15, name: "RDL", goal: 4, remaining: 4, logs: [{w:'', r:''}, {w:'', r:''}] }
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3vc6RNdKYjJBtdOSWTtRBcMSgeMgUqBU",
+            authDomain: "premix-ccc71.firebaseapp.com",
+            databaseURL: "https://premix-ccc71-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "premix-ccc71",
+            storageBucket: "premix-ccc71.firebasestorage.app",
+            messagingSenderId: "48406470893",
+            appId: "1:48406470893:web:31093471628b14bf0d6ce4",
+            measurementId: "G-T9J9EZNGB2"
+        };
+
+        let db = null;
+        let cloudData = {};
+        let allLogsData = {};
+
+        function updateConnectionStatus(isOnline) {
+            const syncText = document.getElementById('syncText');
+            const syncDot = document.getElementById('syncDot');
+            if (!syncText || !syncDot) return;
+
+            if (isOnline) {
+                syncText.innerText = "Online";
+                syncDot.classList.remove('offline');
+            } else {
+                syncText.innerText = "Offline";
+                syncDot.classList.add('offline');
+            }
+        }
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            
+            db.ref('last_premixes').on('value', (snapshot) => {
+                cloudData = snapshot.val() || {};
+                updateLastPrepUI();
+                updateGlobalWarning();
+            });
+
+            db.ref('all_logs').on('value', (snapshot) => {
+                allLogsData = snapshot.val() || {};
+            });
+        } catch (e) {
+            console.warn("Firebase init error, running in offline mode:", e);
+            updateConnectionStatus(false);
+        }
+
+        /* -------------------------------------------------------------
+           Offline Queue & Sync Logic
+        ------------------------------------------------------------- */
+        function getOfflineQueue() {
+            try {
+                return JSON.parse(localStorage.getItem('klio_offline_queue') || '[]');
+            } catch(e) {
+                return [];
+            }
+        }
+
+        function saveOfflineQueue(queue) {
+            localStorage.setItem('klio_offline_queue', JSON.stringify(queue));
+        }
+
+        let isSyncing = false;
+        async function syncOfflineQueue() {
+            if (!navigator.onLine || !db || isSyncing) return;
+            
+            const queue = getOfflineQueue();
+            if (queue.length === 0) return;
+
+            isSyncing = true;
+            const remaining = [];
+            
+            for (const item of queue) {
+                try {
+                    // 1. Εγγραφή στο all_logs με το αρχικό timestamp
+                    await db.ref('all_logs/' + item.id).set(item);
+
+                    // 2. Ενημέρωση του πρόσφατου ιστορικού last_premixes
+                    const snap = await db.ref('last_premixes/' + item.cocktail).once('value');
+                    let currentHistory = getHistoryArray(snap.val());
+                    
+                    if (!currentHistory.some(h => h.id === item.id)) {
+                        currentHistory.unshift(item);
+                        // Ταξινόμηση ώστε να μπει στη σωστή χρονολογική σειρά
+                        currentHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                        await db.ref('last_premixes/' + item.cocktail).set(currentHistory.slice(0, 3));
+                    }
+                } catch (err) {
+                    console.error("Σφάλμα συγχρονισμού offline log:", item, err);
+                    remaining.push(item);
+                }
+            }
+
+            saveOfflineQueue(remaining);
+            isSyncing = false;
+        }
+
+        // Ακροατές κατάστασης σύνδεσης
+        window.addEventListener('online', () => {
+            updateConnectionStatus(true);
+            syncOfflineQueue();
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus(false);
+        });
+
+        if (db) {
+            db.ref('.info/connected').on('value', (snap) => {
+                const isOnline = snap.val() === true;
+                updateConnectionStatus(isOnline);
+                if (isOnline) {
+                    syncOfflineQueue();
+                }
+            });
+        }
+
+        const recipes = {
+            happy_hawaiian: {
+                name: "Happy Hawaiian",
+                color: "#00cbc6",
+                ingredients: [
+                    { name: "Blend of rums", baseAmount: 480, unit: "ml" },
+                    { name: "Lime juice", baseAmount: 160, unit: "ml" },
+                    { name: "Creme de cacao", baseAmount: 120, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 80, unit: "ml" },
+                    { name: "Passion fruit puree", baseAmount: 80, unit: "ml" },
+                    { name: "Falernum", baseAmount: 40, unit: "ml" }
+                ],
+                service: "120ml Premix + 40ml Pineapple juice"
+            },
+            three_birds: {
+                name: "Three Little Birds",
+                color: "#ffbb00",
+                ingredients: [
+                    { name: "Plantation Original dark", baseAmount: 500, unit: "ml" },
+                    { name: "Banana puree", baseAmount: 200, unit: "ml" },
+                    { name: "Lime juice", baseAmount: 200, unit: "ml" },
+                    { name: "Salted caramel", baseAmount: 100, unit: "ml" },
+                    { name: "Angostura bitters", baseAmount: 10, unit: "σταγόνες / dashes" }
+                ],
+                service: "100ml Premix + 40ml Pineapple juice"
+            },
+            tiki_tijuana: {
+                name: "Tiki in Tijuana",
+                color: "#4cd137",
+                ingredients: [
+                    { name: "Tequila", baseAmount: 550, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 220, unit: "ml" },
+                    { name: "Yuzu liqueur", baseAmount: 110, unit: "ml" },
+                    { name: "Agave syrup", baseAmount: 110, unit: "ml" }
+                ],
+                service: "90ml Premix + 20ml Lime juice"
+            },
+            mama_africa: {
+                name: "Mama Africa",
+                color: "#e15f41",
+                ingredients: [
+                    { name: "Rum", baseAmount: 400, unit: "ml" },
+                    { name: "Lime juice", baseAmount: 160, unit: "ml" },
+                    { name: "Mango puree", baseAmount: 160, unit: "ml" },
+                    { name: "Biscuit syrup", baseAmount: 160, unit: "ml" },
+                    { name: "Otto's vermouth", baseAmount: 120, unit: "ml" }
+                ],
+                service: "125ml Premix + 30ml Pineapple juice"
+            },
+            kyoto: {
+                name: "Kyoto",
+                color: "#a55eea",
+                ingredients: [
+                    { name: "Gin", baseAmount: 550, unit: "ml" },
+                    { 
+                        name: "Mint syrup", 
+                        baseAmount: 275, 
+                        unit: "ml",
+                        info: [
+                            "2.5 κούπες ζάχαρη",
+                            "Καυτό νερό μέχρι 800ml",
+                            "1 γαστρονόμος δυόσμο",
+                            "30 λεπτά στην άκρη"
+                        ]
+                    },
+                    { name: "Passionfruit puree", baseAmount: 110, unit: "ml" }
+                ],
+                service: "85ml Premix + 30ml Lime juice"
+            },
+            tiki_zombie: {
+                name: "Tiki Zombie",
+                color: "#ff3f34",
+                ingredients: [
+                    { name: "Blend of rums", baseAmount: 480, unit: "ml" },
+                    { name: "Sugar syrup", baseAmount: 80, unit: "ml" },
+                    { name: "Triple sec", baseAmount: 80, unit: "ml" },
+                    { name: "Amaretto", baseAmount: 120, unit: "ml" },
+                    { name: "Lime juice", baseAmount: 160, unit: "ml" }
+                ],
+                service: "115ml Premix + 50ml Pineapple juice"
+            },
+            bahama_mama: {
+                name: "Bahama Mama",
+                color: "#ff7979",
+                ingredients: [
+                    { name: "Rum", baseAmount: 350, unit: "ml" },
+                    { name: "Malibu", baseAmount: 140, unit: "ml" },
+                    { name: "Creme de mure", baseAmount: 105, unit: "ml" },
+                    { name: "Orange juice", baseAmount: 175, unit: "ml" },
+                    { name: "Lime juice", baseAmount: 140, unit: "ml" }
+                ],
+                service: "130ml Premix + 25ml Pineapple juice"
+            },
+            negroni: {
+                name: "Negroni",
+                color: "#c23616",
+                ingredients: [
+                    { name: "Gin", baseAmount: 300, unit: "ml" },
+                    { name: "Campari", baseAmount: 300, unit: "ml" },
+                    { name: "Martini Rosso", baseAmount: 300, unit: "ml" },
+                    { name: "Water", baseAmount: 100, unit: "ml" }
+                ],
+                service: "Ready to serve!"
+            }
+        };
+
+        let currentCocktail = 'happy_hawaiian';
+        let lastSliderValue = 10; 
+
+        function selectCocktail(cocktailKey, element) {
+            document.querySelectorAll('.cocktail-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            
+            currentCocktail = cocktailKey;
+            updateValues();
+            updateLastPrepUI();
+        }
+
+        function toggleIngInfo(id, event) {
+            event.stopPropagation();
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('active');
+        }
+
+        function updateValues() {
+            const slider = document.getElementById('premixSlider');
+            const sliderValue = parseInt(slider.value);
+            const totalVolume = sliderValue * 100;
+            
+            if (sliderValue !== lastSliderValue) {
+                if (navigator.vibrate) navigator.vibrate(12);
+                lastSliderValue = sliderValue;
+            }
+            
+            const recipe = recipes[currentCocktail];
+            document.documentElement.style.setProperty('--accent-color', recipe.color);
+            
+            const percentage = ((sliderValue - slider.min) / (slider.max - slider.min)) * 100;
+            const track = document.getElementById('sliderTrack');
+            if (track) {
+                track.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percentage}%, #25302a ${percentage}%, #25302a 100%)`;
+            }
+
+            const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
+            document.getElementById('volumeDisplay').innerText = formattedVolume;
+
+            const listContainer = document.getElementById('ingredientsList');
+            listContainer.innerHTML = '';
+
+            recipe.ingredients.forEach((ing, index) => {
+                let calculatedAmount = (ing.baseAmount / 10) * sliderValue;
+                calculatedAmount = Math.round(calculatedAmount * 10) / 10;
+
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'ingredient-item';
+
+                let infoBtn = '';
+                let infoBox = '';
+
+                if (ing.info) {
+                    const infoContent = Array.isArray(ing.info) 
+                        ? ing.info.map(line => `• ${line}`).join('<br>') 
+                        : ing.info;
+
+                    infoBtn = `<button class="info-btn" onclick="toggleIngInfo('ing-info-${index}', event)">ℹ️</button>`;
+                    infoBox = `<div id="ing-info-${index}" class="ingredient-info-box">${infoContent}</div>`;
+                }
+
+                itemDiv.innerHTML = `
+                    <div class="ingredient-row">
+                        <span class="ing-name">${ing.name} ${infoBtn}</span>
+                        <span class="ing-amount">${calculatedAmount} ${ing.unit}</span>
+                    </div>
+                    ${infoBox}
+                `;
+                listContainer.appendChild(itemDiv);
+            });
+
+            document.getElementById('serviceText').innerText = recipe.service;
+        }
+
+        function getHistoryArray(data) {
+            if (!data) return [];
+            if (Array.isArray(data)) return [...data];
+            if (typeof data === 'object') {
+                if (data.date) return [data];
+                return Object.values(data);
+            }
+            return [];
+        }
+
+        // Global Warning Check (15 days for Negroni, 4 days for others)
+        function updateGlobalWarning() {
+            const container = document.getElementById('globalWarningContainer');
+            if (!container) return;
+
+            const now = Date.now();
+            const expiredList = [];
+
+            Object.keys(recipes).forEach(key => {
+                const history = getHistoryArray(cloudData[key]);
+                if (history.length > 0 && history[0].timestamp) {
+                    const limitDays = key === 'negroni' ? 15 : 4;
+                    const limitMs = limitDays * 24 * 60 * 60 * 1000;
+                    if (now - history[0].timestamp >= limitMs) {
+                        expiredList.push(recipes[key].name);
+                    }
+                }
+            });
+
+            if (expiredList.length > 0) {
+                container.style.display = 'block';
+                container.innerHTML = `⚠️ <strong>Προσοχή premix:</strong> ${expiredList.join(', ')}`;
+            } else {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            }
+        }
+
+        function updateLastPrepUI() {
+            const history = getHistoryArray(cloudData[currentCocktail]);
+            const listEl = document.getElementById('historyList');
+            const boxEl = document.getElementById('lastPrepBox');
+            if (!listEl) return;
+
+            if (history.length === 0) {
+                if (boxEl) boxEl.classList.remove('expired');
+                listEl.innerHTML = `
+                    <div class="history-item">
+                        <span class="history-date" style="color:var(--text-muted); font-weight:400;">Δεν υπάρχει ιστορικό ακόμα</span>
+                        <span class="history-vol">-</span>
+                    </div>`;
+                return;
+            }
+
+            const latest = history[0];
+            const limitDays = currentCocktail === 'negroni' ? 15 : 4;
+            const thresholdMs = limitDays * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            
+            let isExpired = false;
+            let daysPassed = 0;
+
+            if (latest.timestamp) {
+                const diff = now - latest.timestamp;
+                if (diff >= thresholdMs) {
+                    isExpired = true;
+                    daysPassed = Math.floor(diff / (24 * 60 * 60 * 1000));
+                }
+            }
+
+            if (boxEl) {
+                if (isExpired) {
+                    boxEl.classList.add('expired');
+                } else {
+                    boxEl.classList.remove('expired');
+                }
+            }
+
+            let warningBanner = '';
+            if (isExpired) {
+                warningBanner = `
+                    <div class="history-warning-banner">
+                        <span>⚠️</span>
+                        <span>Προσοχή: Πέρασαν ${daysPassed} μέρες από το τελευταίο premix!</span>
+                    </div>
+                `;
+            }
+
+            listEl.innerHTML = warningBanner + history.slice(0, 3).map((item) => `
+                <div class="history-item">
+                    <span class="history-date">${item.date || '-'}</span>
+                    <span class="history-vol">${item.volume || '-'}</span>
+                </div>
+            `).join('');
+        }
+
+        function recordNewBatch() {
+            const slider = document.getElementById('premixSlider');
+            const sliderValue = parseInt(slider.value);
+            if (sliderValue === 0) return;
+
+            // Έλεγχος αν καταχωρήθηκε πρόσφατα (εντός 10 λεπτών)
+            const history = getHistoryArray(cloudData[currentCocktail]);
+            if (history.length > 0 && history[0].timestamp) {
+                const nowMs = Date.now();
+                const diffMs = nowMs - history[0].timestamp;
+                const tenMinutesMs = 10 * 60 * 1000;
+
+                if (diffMs >= 0 && diffMs < tenMinutesMs) {
+                    const diffMinutes = Math.floor(diffMs / (60 * 1000));
+                    const cocktailName = recipes[currentCocktail].name;
+                    const timeText = diffMinutes === 0 
+                        ? "μόλις τώρα" 
+                        : (diffMinutes === 1 ? "πριν από 1 λεπτό" : `πριν από ${diffMinutes} λεπτά`);
+
+                    const confirmMsg = `⚠️ Πρόσφατη Καταχώριση\n\nΥπάρχει ήδη καταχώριση για ${cocktailName} ${timeText}.\n\nΣυνέχεια με δημιουργία νέου premix;`;
+                    
+                    if (!confirm(confirmMsg)) {
+                        return;
+                    }
+                }
+            }
+
+            const totalVolume = sliderValue * 100;
+            const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
+            
+            // Κλείδωμα αρχικού χρόνου κατά το πάτημα του κουμπιού
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
+            const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
+            const fullDateString = `${dateStr} @ ${timeStr}`;
+
+            let logId = (db ? db.ref('all_logs').push().key : null) || ('local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5));
+
+            const batchData = {
+                id: logId,
+                cocktail: currentCocktail,
+                cocktailName: recipes[currentCocktail].name,
+                volume_ml: totalVolume,
+                volume: formattedVolume,
+                date: fullDateString,
+                timestamp: now.getTime()
+            };
+
+            // 1. Άμεση ενημέρωση τοπικών δεδομένων UI
+            allLogsData[logId] = batchData;
+
+            let updatedHistory = getHistoryArray(cloudData[currentCocktail]);
+            updatedHistory.unshift(batchData);
+            if (updatedHistory.length > 3) {
+                updatedHistory = updatedHistory.slice(0, 3);
+            }
+            cloudData[currentCocktail] = updatedHistory;
+
+            updateLastPrepUI();
+            updateGlobalWarning();
+
+            // 2. Αποθήκευση στην Offline Queue & Συγχρονισμός
+            const queue = getOfflineQueue();
+            queue.push(batchData);
+            saveOfflineQueue(queue);
+
+            if (navigator.onLine && db) {
+                syncOfflineQueue();
+            }
+
+            if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+
+            const btn = document.getElementById('logBtn');
+            const textSpan = document.getElementById('logBtnText');
+            const iconSpan = document.getElementById('logBtnIcon');
+
+            btn.classList.add('success');
+            textSpan.innerText = navigator.onLine ? "Saved ✓" : "Saved (Offline) ✓";
+            iconSpan.innerText = "";
+
+            setTimeout(() => {
+                btn.classList.remove('success');
+                textSpan.innerText = "Log Premix";
+                iconSpan.innerText = "📝";
+            }, 1000);
+        }
+
+        function deleteLatestLog() {
+            let history = getHistoryArray(cloudData[currentCocktail]);
+            if (history.length === 0) return;
+
+            const latest = history[0];
+            const confirmDelete = confirm(`Διαγραφή τελευταίας εγγραφής;\n\n🍹 ${recipes[currentCocktail].name}\n📦 ${latest.volume} (${latest.date})`);
+            
+            if (!confirmDelete) return;
+
+            // Αφαίρεση από Offline Queue εάν υπήρχε εκεί
+            if (latest.id) {
+                const queue = getOfflineQueue();
+                const filteredQueue = queue.filter(q => q.id !== latest.id);
+                saveOfflineQueue(filteredQueue);
+            }
+
+            // Remove from permanent all_logs node
+            if (latest.id) {
+                if (db && navigator.onLine) {
+                    db.ref('all_logs/' + latest.id).remove();
+                }
+                delete allLogsData[latest.id];
+            } else if (latest.timestamp && db && navigator.onLine) {
+                db.ref('all_logs').orderByChild('timestamp').equalTo(latest.timestamp).once('value', (snapshot) => {
+                    snapshot.forEach((child) => {
+                        if (child.val().cocktail === currentCocktail) {
+                            child.ref.remove();
+                        }
+                    });
+                });
+            }
+
+            // Remove from recent history
+            history.shift();
+
+            if (db && navigator.onLine) {
+                db.ref('last_premixes/' + currentCocktail).set(history);
+            }
+            cloudData[currentCocktail] = history;
+            updateLastPrepUI();
+            updateGlobalWarning();
+
+            if (navigator.vibrate) navigator.vibrate(80);
+        }
+
+        let pressTimer = null;
+        const prepBox = document.getElementById('lastPrepBox');
+
+        function startPress() {
+            pressTimer = setTimeout(() => {
+                if (navigator.vibrate) navigator.vibrate(40);
+                deleteLatestLog();
+            }, 650);
+        }
+
+        function cancelPress() {
+            if (pressTimer) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+        }
+
+        prepBox.addEventListener('touchstart', startPress, { passive: true });
+        prepBox.addEventListener('touchend', cancelPress);
+        prepBox.addEventListener('touchcancel', cancelPress);
+        prepBox.addEventListener('touchmove', cancelPress);
+
+        prepBox.addEventListener('mousedown', startPress);
+        prepBox.addEventListener('mouseup', cancelPress);
+        prepBox.addEventListener('mouseleave', cancelPress);
+        prepBox.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        /* -------------------------------------------------------------
+           Triple-Tap Header & Monthly Stats Logic
+        ------------------------------------------------------------- */
+        const greekMonths = [
+            'Ιανουάριος', 'Φεβρουάριος', 'Μάρτιος', 'Απρίλιος', 
+            'Μάιος', 'Ιούνιος', 'Ιούλιος', 'Αύγουστος', 
+            'Σεπτέμβριος', 'Οκτώβριος', 'Νοέμβριος', 'Δεκέμβριος'
         ];
 
-        let exercises = [];
+        let tapCount = 0;
+        let tapTimer = null;
+        const titleEl = document.getElementById('appTitle');
 
-        function triggerHaptic() {
-            if (navigator.vibrate) navigator.vibrate(50);
-        }
-
-        function updateScrollLock() {
-            const settingsOpen = document.getElementById('settingsModal').style.display === 'flex';
-            const editOpen = document.getElementById('editModal').style.display === 'flex';
-            
-            if (settingsOpen || editOpen) {
-                document.body.classList.add('modal-open');
+        titleEl.addEventListener('click', () => {
+            tapCount++;
+            clearTimeout(tapTimer);
+            if (tapCount === 3) {
+                tapCount = 0;
+                if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+                openMonthlyStats();
             } else {
-                document.body.classList.remove('modal-open');
-            }
-        }
-
-        function initApp() {
-            const savedData = localStorage.getItem('gymData'); 
-            if (savedData) {
-                exercises = JSON.parse(savedData);
-                exercises.forEach(ex => {
-                    if (!ex.logs) {
-                        ex.logs = [{w: '', r: ''}, {w: '', r: ''}];
-                    }
-                });
-            } else {
-                exercises = JSON.parse(JSON.stringify(initialExercises));
-            }
-            initDragAndDropListeners();
-            renderUI();
-        }
-
-        function saveData() {
-            localStorage.setItem('gymData', JSON.stringify(exercises));
-            renderUI();
-            if(document.getElementById('settingsModal').style.display === 'flex') {
-                renderSettingsList();
-            }
-        }
-
-        function addSet(id) {
-            triggerHaptic();
-            const ex = exercises.find(e => e.id === id);
-            if (ex && ex.remaining > 0) {
-                ex.remaining -= 1;
-                saveData();
-            }
-        }
-
-        function removeSet(id) {
-            triggerHaptic();
-            const ex = exercises.find(e => e.id === id);
-            if (ex && ex.remaining < ex.goal) {
-                ex.remaining += 1;
-                saveData();
-            }
-        }
-
-        function resetWeek() {
-            triggerHaptic();
-            if (confirm("Reset all weekly progress? This cannot be undone.")) {
-                exercises.forEach(ex => { 
-                    ex.remaining = ex.goal; 
-                });
-                saveData();
-            }
-        }
-
-        function updateLog(exId, logIndex, field, value) {
-            const ex = exercises.find(e => e.id === exId);
-            if (ex) {
-                ex.logs[logIndex][field] = value;
-                localStorage.setItem('gymData', JSON.stringify(exercises));
-            }
-        }
-
-        function addLogSet(id) {
-            triggerHaptic();
-            const ex = exercises.find(e => e.id === id);
-            if (ex) {
-                ex.logs.push({w: '', r: ''});
-                saveData();
-            }
-        }
-
-        function removeLogSet(id) {
-            triggerHaptic();
-            const ex = exercises.find(e => e.id === id);
-            if (ex && ex.logs.length > 1) {
-                ex.logs.pop();
-                saveData();
-            }
-        }
-
-        function renderUI() {
-            const listContainer = document.getElementById('exerciseList');
-            listContainer.innerHTML = '';
-            
-            let totalGoal = 0;
-            let totalRemaining = 0;
-
-            exercises.forEach(ex => {
-                totalGoal += ex.goal;
-                totalRemaining += ex.remaining;
-
-                const isCompleted = ex.remaining === 0;
-                
-                let logsHtml = '';
-                ex.logs.forEach((log, index) => {
-                    logsHtml += `
-                        <div class="tracker-row">
-                            <span class="tracker-label">Set ${index + 1}</span>
-                            <input type="text" inputmode="decimal" class="tracker-input" placeholder="kg" value="${log.w}" oninput="this.value = this.value.replace(',', '.'); updateLog(${ex.id}, ${index}, 'w', this.value)">
-                            <span style="color: var(--text-sec); font-weight: bold;">×</span>
-                            <input type="text" inputmode="decimal" class="tracker-input" placeholder="reps" value="${log.r}" oninput="this.value = this.value.replace(',', '.'); updateLog(${ex.id}, ${index}, 'r', this.value)">
-                        </div>
-                    `;
-                });
-                
-                const card = document.createElement('div');
-                card.className = `card ${isCompleted ? 'completed' : ''}`;
-                
-                card.innerHTML = `
-                    <div class="card-top">
-                        <div class="card-left">
-                            <div class="exercise-name">
-                                ${ex.name} 
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="exercise-status">${ex.remaining} / ${ex.goal} sets left</div>
-                        </div>
-                        <div class="card-right">
-                            <button class="circle-btn btn-minus" onclick="removeSet(${ex.id})">-</button>
-                            <button class="circle-btn btn-plus" onclick="addSet(${ex.id})">+</button>
-                        </div>
-                    </div>
-                    
-                    <div class="tracker-container">
-                        ${logsHtml}
-                        <div class="tracker-actions">
-                            <button class="tracker-btn" onclick="removeLogSet(${ex.id})">- Set</button>
-                            <button class="tracker-btn" onclick="addLogSet(${ex.id})">+ Set</button>
-                        </div>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
-
-            const completedSets = totalGoal - totalRemaining;
-            let progressPercent = 0;
-            if (totalGoal > 0) {
-                progressPercent = Math.round((completedSets / totalGoal) * 100);
-            }
-
-            document.getElementById('progressFill').style.width = `${progressPercent}%`;
-            document.getElementById('progressText').innerText = `${progressPercent}% weekly volume.`;
-        }
-
-        /* --- SETTINGS LOGIC & DYNAMIC AUTO-SCROLL DRAG AND DROP --- */
-        let activeDragItem = null;
-        let longPressTimer = null;
-        let startY = 0;
-        let currentTouchX = 0;
-        let currentTouchY = 0;
-        let autoScrollFrame = null;
-
-        function attachItemDragStart(item) {
-            const handleStart = (e) => {
-                if (e.target.closest('.set-item-actions')) return;
-
-                const touch = e.touches ? e.touches[0] : e;
-                startY = touch.clientY;
-                currentTouchX = touch.clientX;
-                currentTouchY = touch.clientY;
-
-                clearTimeout(longPressTimer);
-                longPressTimer = setTimeout(() => {
-                    activeDragItem = item;
-                    item.classList.add('dragging');
-                    triggerHaptic();
-                    if (!autoScrollFrame) {
-                        autoScrollFrame = requestAnimationFrame(doAutoScroll);
-                    }
-                }, 400);
-            };
-
-            item.addEventListener('touchstart', handleStart, { passive: true });
-            item.addEventListener('mousedown', handleStart);
-        }
-
-        function reorderItems(clientX, clientY) {
-            if (!activeDragItem) return;
-            const targetEl = document.elementFromPoint(clientX, clientY);
-            const targetItem = targetEl ? targetEl.closest('.set-item') : null;
-            const list = document.getElementById('settingsExerciseList');
-
-            if (targetItem && targetItem !== activeDragItem && targetItem.parentNode === list) {
-                const rect = targetItem.getBoundingClientRect();
-                const next = (clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
-                list.insertBefore(activeDragItem, next ? targetItem.nextSibling : targetItem);
-            }
-        }
-
-        function doAutoScroll() {
-            if (!activeDragItem) {
-                autoScrollFrame = null;
-                return;
-            }
-
-            const list = document.getElementById('settingsExerciseList');
-            if (list) {
-                const rect = list.getBoundingClientRect();
-                const threshold = 65;
-                const maxSpeed = 16;
-
-                let scrollDelta = 0;
-
-                if (currentTouchY < rect.top + threshold) {
-                    const distance = (rect.top + threshold) - currentTouchY;
-                    const intensity = Math.min(1.5, Math.max(0.1, distance / threshold));
-                    scrollDelta = -Math.round(intensity * maxSpeed);
-                } else if (currentTouchY > rect.bottom - threshold) {
-                    const distance = currentTouchY - (rect.bottom - threshold);
-                    const intensity = Math.min(1.5, Math.max(0.1, distance / threshold));
-                    scrollDelta = Math.round(intensity * maxSpeed);
-                }
-
-                if (scrollDelta !== 0) {
-                    list.scrollTop += scrollDelta;
-                    reorderItems(currentTouchX, currentTouchY);
-                }
-            }
-
-            autoScrollFrame = requestAnimationFrame(doAutoScroll);
-        }
-
-        function initDragAndDropListeners() {
-            const handleMove = (e) => {
-                const touch = e.touches ? e.touches[0] : e;
-                currentTouchX = touch.clientX;
-                currentTouchY = touch.clientY;
-
-                if (!activeDragItem) {
-                    if (longPressTimer && Math.abs(currentTouchY - startY) > 10) {
-                        clearTimeout(longPressTimer);
-                    }
-                    return;
-                }
-
-                if (e.cancelable) e.preventDefault();
-
-                reorderItems(currentTouchX, currentTouchY);
-            };
-
-            const handleEnd = () => {
-                clearTimeout(longPressTimer);
-                if (autoScrollFrame) {
-                    cancelAnimationFrame(autoScrollFrame);
-                    autoScrollFrame = null;
-                }
-                if (activeDragItem) {
-                    activeDragItem.classList.remove('dragging');
-                    activeDragItem = null;
-                    
-                    const list = document.getElementById('settingsExerciseList');
-                    const newOrderIds = Array.from(list.children).map(child => parseInt(child.dataset.id));
-                    exercises.sort((a, b) => newOrderIds.indexOf(a.id) - newOrderIds.indexOf(b.id));
-                    saveData();
-                }
-            };
-
-            window.addEventListener('touchmove', handleMove, { passive: false });
-            window.addEventListener('touchend', handleEnd);
-            window.addEventListener('touchcancel', handleEnd);
-
-            window.addEventListener('mousemove', handleMove);
-            window.addEventListener('mouseup', handleEnd);
-        }
-
-        function openSettings() {
-            triggerHaptic();
-            document.getElementById('settingsModal').style.display = 'flex';
-            updateScrollLock();
-            renderSettingsList();
-        }
-
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-            updateScrollLock();
-        }
-
-        function renderSettingsList() {
-            const list = document.getElementById('settingsExerciseList');
-            list.innerHTML = '';
-
-            exercises.forEach(ex => {
-                const item = document.createElement('div');
-                item.className = 'set-item';
-                item.dataset.id = ex.id;
-                item.innerHTML = `
-                    <div class="set-item-info">
-                        <div class="set-item-name">${ex.name}</div>
-                        <div class="set-item-goal">Goal: ${ex.goal} sets</div>
-                    </div>
-                    <div class="set-item-actions">
-                        <button class="btn-edit" onclick="openEditModal(${ex.id})">✎</button>
-                        <button class="btn-del" onclick="deleteExercise(${ex.id})">🗑</button>
-                    </div>
-                `;
-                attachItemDragStart(item);
-                list.appendChild(item);
-            });
-        }
-
-        function addExercise() {
-            const nameInput = document.getElementById('newExName');
-            const goalInput = document.getElementById('newExGoal');
-            
-            const name = nameInput.value.trim();
-            const goal = parseInt(goalInput.value);
-
-            if (!name || isNaN(goal) || goal < 1) {
-                alert("Please enter a valid name and number of sets.");
-                return;
-            }
-
-            const newId = exercises.length > 0 ? Math.max(...exercises.map(e => e.id)) + 1 : 1;
-            
-            exercises.push({
-                id: newId,
-                name: name,
-                goal: goal,
-                remaining: goal,
-                logs: [{w: '', r: ''}, {w: '', r: ''}]
-            });
-
-            nameInput.value = '';
-            goalInput.value = '';
-            saveData();
-        }
-
-        function deleteExercise(id) {
-            if(confirm("Delete this exercise permanently?")) {
-                exercises = exercises.filter(ex => ex.id !== id);
-                saveData();
-            }
-        }
-
-        function openEditModal(id) {
-            const ex = exercises.find(e => e.id === id);
-            if (!ex) return;
-
-            document.getElementById('editExId').value = ex.id;
-            document.getElementById('editExName').value = ex.name;
-            document.getElementById('editExGoal').value = ex.goal;
-            
-            document.getElementById('editModal').style.display = 'flex';
-            updateScrollLock();
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            updateScrollLock();
-        }
-
-        function saveEdit() {
-            const id = parseInt(document.getElementById('editExId').value);
-            const newName = document.getElementById('editExName').value.trim();
-            const newGoal = parseInt(document.getElementById('editExGoal').value);
-
-            if (!newName || isNaN(newGoal) || newGoal < 1) {
-                alert("Please enter valid data.");
-                return;
-            }
-
-            const exIndex = exercises.findIndex(e => e.id === id);
-            if (exIndex !== -1) {
-                const ex = exercises[exIndex];
-                ex.name = newName;
-                
-                const completedSets = ex.goal - ex.remaining;
-                ex.goal = newGoal;
-                ex.remaining = Math.max(0, newGoal - completedSets);
-
-                saveData();
-                closeEditModal();
-            }
-        }
-
-        // ΕΠΑΝΑΦΟΡΑ ΟΘΟΝΗΣ ΣΤΟ ΚΛΕΙΣΙΜΟ ΠΛΗΚΤΡΟΛΟΓΙΟΥ
-        document.addEventListener('focusout', (e) => {
-            if (e.target.tagName === 'INPUT') {
-                window.scrollTo(0, 0);
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 450);
             }
         });
 
-        // Start App
-        initApp();
+        function openMonthlyStats() {
+            const modal = document.getElementById('statsModal');
+            modal.classList.add('active');
+            renderMonthSelectionView();
+        }
 
-        /* --- ΑΥΤΟΜΑΤΗ ΕΝΗΜΕΡΩΣΗ SERVICE WORKER & RELOAD --- */
+        function closeMonthlyStats(e) {
+            if (e && e.target !== e.currentTarget && !e.target.classList.contains('modal-close-btn')) {
+                return;
+            }
+            const modal = document.getElementById('statsModal');
+            modal.classList.remove('active');
+        }
+
+        function renderMonthSelectionView() {
+            const body = document.getElementById('modalBody');
+            const logsArray = Object.values(allLogsData || {});
+
+            if (logsArray.length === 0) {
+                body.innerHTML = `
+                    <div style="text-align: center; color: var(--text-muted); padding: 30px 10px;">
+                        <span style="font-size: 32px; display:block; margin-bottom:10px;">📭</span>
+                        Δεν υπάρχουν ακόμη καταγεγραμμένα δεδομένα.
+                    </div>`;
+                return;
+            }
+
+            const monthsMap = {};
+            logsArray.forEach(log => {
+                if (!log.timestamp) return;
+                const d = new Date(log.timestamp);
+                const year = d.getFullYear();
+                const month = d.getMonth();
+                const key = `${year}-${String(month + 1).padStart(2, '0')}`;
+                
+                if (!monthsMap[key]) {
+                    monthsMap[key] = {
+                        key: key,
+                        year: year,
+                        month: month,
+                        label: `${greekMonths[month]} ${year}`,
+                        totalMl: 0
+                    };
+                }
+                const vol = log.volume_ml || (log.volume && log.volume.includes('lt') ? 1000 : parseInt(log.volume) || 0);
+                monthsMap[key].totalMl += vol;
+            });
+
+            const sortedKeys = Object.keys(monthsMap).sort().reverse();
+
+            body.innerHTML = `
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px;">
+                    Επίλεξε μήνα για αναλυτικά στοιχεία παραγωγής:
+                </div>
+                <div class="month-list">
+                    ${sortedKeys.map(k => {
+                        const m = monthsMap[k];
+                        const totalLt = (m.totalMl / 1000).toFixed(1);
+                        return `
+                            <button class="month-btn" onclick="renderMonthDetailView('${m.key}', '${m.label}')">
+                                <span>📅 ${m.label}</span>
+                                <span class="badge">${totalLt} lt</span>
+                            </button>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        function renderMonthDetailView(monthKey, monthLabel) {
+            const body = document.getElementById('modalBody');
+            const logsArray = Object.values(allLogsData || {});
+
+            const cocktailStats = {};
+            Object.keys(recipes).forEach(key => {
+                cocktailStats[key] = {
+                    key: key,
+                    name: recipes[key].name,
+                    color: recipes[key].color,
+                    totalMl: 0
+                };
+            });
+
+            let grandTotalMl = 0;
+
+            logsArray.forEach(log => {
+                if (!log.timestamp) return;
+                const d = new Date(log.timestamp);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (key === monthKey) {
+                    const cKey = log.cocktail;
+                    const vol = log.volume_ml || (log.volume && log.volume.includes('lt') ? 1000 : parseInt(log.volume) || 0);
+                    
+                    if (cocktailStats[cKey]) {
+                        cocktailStats[cKey].totalMl += vol;
+                    }
+                    grandTotalMl += vol;
+                }
+            });
+
+            const sortedList = Object.values(cocktailStats).sort((a, b) => b.totalMl - a.totalMl);
+
+            const formattedGrandTotal = grandTotalMl >= 1000 
+                ? (grandTotalMl / 1000).toFixed(1) + ' lt' 
+                : grandTotalMl + ' ml';
+
+            body.innerHTML = `
+                <div class="month-detail-header">
+                    <button class="back-btn" onclick="renderMonthSelectionView()">← Πίσω</button>
+                    <strong style="font-size: 15px;">${monthLabel}</strong>
+                </div>
+
+                <div class="stat-summary-card">
+                    <div>
+                        <div class="label">Συνολικη Παραγωγη</div>
+                    </div>
+                    <div class="val">${formattedGrandTotal}</div>
+                </div>
+
+                <div class="stats-cocktail-list">
+                    ${sortedList.map(stat => {
+                        const volDisplay = stat.totalMl >= 1000 
+                            ? (stat.totalMl / 1000).toFixed(1) + ' lt' 
+                            : stat.totalMl + ' ml';
+                        const opacity = stat.totalMl === 0 ? 'opacity: 0.4;' : '';
+
+                        return `
+                            <div class="stats-cocktail-row" style="${opacity}">
+                                <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
+                                <div class="stats-cocktail-volume">${volDisplay}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+
+        window.onload = function() {
+            updateValues();
+            document.body.classList.add('loaded');
+            syncOfflineQueue();
+        }
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((reg) => {
                     reg.update();
-
-                    reg.onupdatefound = () => {
-                        const installingWorker = reg.installing;
-                        if (installingWorker) {
-                            installingWorker.onstatechange = () => {
-                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        if (newWorker) {
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                                     window.location.reload();
                                 }
-                            };
+                            });
                         }
-                    };
-                });
-
-                let refreshing = false;
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    if (!refreshing) {
-                        refreshing = true;
-                        window.location.reload();
-                    }
-                });
+                    });
+                }).catch((err) => console.error('Service Worker Registration failed:', err));
             });
         }
     </script>
