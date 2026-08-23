@@ -837,7 +837,7 @@
     <div class="ingredients-card">
         <div id="ingredientsList"></div>
         <div class="service-info" id="serviceContainer">
-            <span>⚡ Service:</span>
+            <span>⚡ Service Directive:</span>
             <div id="serviceText"></div>
         </div>
     </div>
@@ -1024,7 +1024,7 @@
             },
             mama_africa: {
                 name: "Mama Africa",
-                color: "#e15f41",
+                color: "#e55039",
                 ingredients: [
                     { name: "Rum", baseAmount: 400, unit: "ml" },
                     { name: "Lime juice", baseAmount: 160, unit: "ml" },
@@ -1056,7 +1056,7 @@
             },
             tiki_zombie: {
                 name: "Tiki Zombie",
-                color: "#ff3f34",
+                color: "#fb6c0d",
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Sugar syrup", baseAmount: 80, unit: "ml" },
@@ -1068,7 +1068,7 @@
             },
             bahama_mama: {
                 name: "Bahama Mama",
-                color: "#ff7979",
+                color: "#ff388b",
                 ingredients: [
                     { name: "Rum", baseAmount: 350, unit: "ml" },
                     { name: "Malibu", baseAmount: 140, unit: "ml" },
@@ -1080,7 +1080,7 @@
             },
             negroni: {
                 name: "Negroni",
-                color: "#c23616",
+                color: "#d8000b",
                 ingredients: [
                     { name: "Gin", baseAmount: 300, unit: "ml" },
                     { name: "Campari", baseAmount: 300, unit: "ml" },
@@ -1136,7 +1136,6 @@
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             document.getElementById('volumeDisplay').innerText = formattedVolume;
 
-            // Υπολογισμός συνολικού όγκου βάσης για τα Ratio Bars
             const totalBaseMl = recipe.ingredients.reduce((sum, ing) => {
                 return sum + (ing.unit === 'ml' ? ing.baseAmount : 0);
             }, 0);
