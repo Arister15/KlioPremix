@@ -13,7 +13,7 @@
     <link rel="icon" type="image/png" href="images.png">
     <link rel="manifest" href="manifest.json">
     
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Firebase Realtime Database SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -21,9 +21,13 @@
 
     <style>
         :root {
-            --bg-color: #0e1310;
-            --card-bg: #171e1a;
-            --accent-color: #ffd32a;
+            --bg-color: #0b100d;
+            --card-bg: rgba(22, 30, 25, 0.72);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-color: #00cbc6;
+            --accent-glow: rgba(0, 203, 198, 0.25);
+            --accent-glow-strong: rgba(0, 203, 198, 0.45);
+            --accent-bg-subtle: rgba(0, 203, 198, 0.08);
             --text-color: #ffffff;
             --text-muted: #8fa196;
             --success-color: #2ed573;
@@ -48,21 +52,46 @@
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
-            padding: calc(40px + env(safe-area-inset-top)) 20px 40px 20px;
+            padding: calc(36px + env(safe-area-inset-top)) 20px 45px 20px;
             user-select: none;
             -webkit-user-select: none;
             -webkit-tap-highlight-color: transparent;
             opacity: 0;
-            transition: opacity 0.8s ease-in-out, background-color 0.4s ease;
+            transition: opacity 0.6s ease-in-out;
+            position: relative;
+            min-height: 100vh;
+            box-sizing: border-box;
+            overflow-x: hidden;
         }
 
         body.loaded {
             opacity: 1;
         }
 
+        /* Dynamic Ambient Glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140vw;
+            height: 65vh;
+            background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 68%);
+            pointer-events: none;
+            z-index: 0;
+            transition: background 0.6s ease;
+        }
+
+        header, .section-title, .cocktail-selector, .slider-container, 
+        .ingredients-card, .log-action-btn, .global-warning-container {
+            position: relative;
+            z-index: 1;
+        }
+
         header {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 18px;
         }
 
         header h1 {
@@ -73,63 +102,77 @@
             margin: 0;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            transition: color 0.4s ease;
+            text-shadow: 0 4px 20px var(--accent-glow-strong), 0 2px 5px rgba(0, 0, 0, 0.8);
+            transition: color 0.4s ease, text-shadow 0.4s ease;
             cursor: pointer;
         }
 
+        /* Minimal Status Pill */
         .live-status {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-top: 6px;
+            gap: 7px;
+            margin-top: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.4px;
         }
 
         .dot {
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background-color: var(--success-color);
             border-radius: 50%;
             display: inline-block;
-            box-shadow: 0 0 6px var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
         }
 
         .dot.offline {
             background-color: var(--warning-color);
-            box-shadow: 0 0 6px var(--warning-color);
+            box-shadow: 0 0 8px var(--warning-color);
         }
 
         /* Top Warning Banner */
         .global-warning-container {
             display: none;
-            background: rgba(255, 71, 87, 0.15);
-            border: 1px solid var(--warning-color);
-            border-radius: 14px;
-            padding: 10px 14px;
+            background: rgba(255, 71, 87, 0.12);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 12px 16px;
             color: #ff6b81;
             font-size: 12px;
             font-weight: 600;
-            margin-top: 14px;
             margin-bottom: 20px;
             line-height: 1.4;
             animation: pulseWarning 2.2s infinite ease-in-out;
             text-align: center;
+            box-shadow: 0 6px 20px rgba(255, 71, 87, 0.15);
         }
 
         .section-title {
             font-family: 'Fredoka', sans-serif;
-            font-size: 15px;
+            font-size: 14px;
             text-transform: uppercase;
             color: var(--text-muted);
             margin-bottom: 12px;
-            font-weight: 500;
-            letter-spacing: 0.8px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
+        /* Glassmorphic Cocktail Selector */
         .cocktail-selector {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -138,17 +181,19 @@
         }
 
         .cocktail-btn {
-            background-color: var(--card-bg);
-            border: 2px solid transparent;
-            border-radius: 16px;
-            padding: 14px 8px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1.5px solid var(--card-border);
+            border-radius: 18px;
+            padding: 14px 10px;
             color: var(--text-color);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
             word-wrap: break-word;
             display: flex;
             align-items: center;
@@ -158,33 +203,39 @@
 
         .cocktail-btn.active {
             border-color: var(--accent-color);
-            background-color: rgba(0, 0, 0, 0.2);
+            background: linear-gradient(145deg, var(--accent-bg-subtle) 0%, rgba(20, 28, 23, 0.85) 100%);
             color: var(--accent-color);
-            transform: scale(1.02);
-            box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 22px var(--accent-glow), inset 0 0 12px var(--accent-bg-subtle);
         }
 
+        /* Glassmorphic Slider Container */
         .slider-container {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 22px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 20px var(--accent-bg-subtle);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
         .slider-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 16px;
         }
 
         .volume-display {
             font-family: 'Fredoka', sans-serif;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: 700;
             color: var(--accent-color);
-            transition: color 0.4s ease;
+            text-shadow: 0 0 16px var(--accent-glow-strong);
+            transition: color 0.4s ease, text-shadow 0.4s ease;
         }
 
         .slider-wrapper {
@@ -201,9 +252,10 @@
             left: 0;
             right: 0;
             height: 10px;
-            border-radius: 5px;
-            background: #25302a;
+            border-radius: 6px;
+            background: #202b25;
             pointer-events: none;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
         }
 
         .slider-input {
@@ -232,11 +284,11 @@
             border-radius: 0 !important;
             box-shadow: none !important;
             outline: none !important;
-            transition: transform 0.1s ease;
+            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         
         .slider-input::-webkit-slider-thumb:active {
-            transform: scale(1.15);
+            transform: scale(1.22);
         }
 
         .slider-input::-moz-range-thumb {
@@ -257,32 +309,35 @@
             justify-content: space-between;
             color: var(--text-muted);
             font-size: 12px;
-            padding: 0 2px;
-            font-weight: 500;
+            padding: 0 4px;
+            font-weight: 600;
         }
 
         /* Premix History Container */
         .last-prep-box {
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 3px solid var(--accent-color);
-            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.35);
+            border-left: 3.5px solid var(--accent-color);
+            border-radius: 14px;
             padding: 12px 14px;
-            margin-top: 18px;
+            margin-top: 20px;
             display: flex;
             flex-direction: column;
             gap: 6px;
             transition: all 0.3s ease;
             cursor: pointer;
             touch-action: pan-y;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
         }
 
         .last-prep-box.expired {
             border-left-color: var(--warning-color);
-            background: rgba(255, 71, 87, 0.08);
+            background: rgba(255, 71, 87, 0.09);
         }
 
         .last-prep-box:active {
-            background: rgba(0, 0, 0, 0.45);
+            background: rgba(0, 0, 0, 0.5);
         }
 
         .last-prep-header {
@@ -296,8 +351,8 @@
             font-size: 11px;
             text-transform: uppercase;
             color: var(--text-muted);
-            letter-spacing: 0.5px;
-            font-weight: 600;
+            letter-spacing: 0.6px;
+            font-weight: 700;
         }
 
         .last-prep-hint {
@@ -306,7 +361,6 @@
             opacity: 0.6;
         }
 
-        /* Warning Banner Styles */
         .history-warning-banner {
             display: flex;
             align-items: center;
@@ -314,8 +368,8 @@
             background: rgba(255, 71, 87, 0.18);
             border: 1px solid rgba(255, 71, 87, 0.45);
             color: #ff6b81;
-            padding: 7px 10px;
-            border-radius: 8px;
+            padding: 8px 10px;
+            border-radius: 10px;
             font-size: 11.5px;
             font-weight: 600;
             margin-bottom: 6px;
@@ -339,7 +393,7 @@
             align-items: center;
             justify-content: space-between;
             font-size: 13px;
-            padding: 2px 0;
+            padding: 3px 0;
             border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
         }
 
@@ -373,62 +427,104 @@
             opacity: 0.8;
         }
 
+        /* Glassmorphic Ingredients Card */
         .ingredients-card {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            padding: 20px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 22px;
+            padding: 22px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 20px var(--accent-bg-subtle);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
         }
 
         .ingredient-item {
-            border-bottom: 1px solid #25302a;
-            padding: 14px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 13px 0;
         }
 
         .ingredient-item:last-child {
             border-bottom: none;
+            padding-bottom: 4px;
         }
 
         .ingredient-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         .ing-name {
-            font-weight: 500;
+            font-weight: 600;
             display: flex;
             align-items: center;
+            gap: 4px;
         }
 
         .ing-amount {
             font-family: 'Fredoka', sans-serif;
             font-weight: 700;
+            font-size: 16px;
             color: var(--accent-color);
             transition: color 0.4s ease;
         }
 
+        /* Visual Ratio Bar */
+        .ratio-bar-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 3px;
+            margin-top: 7px;
+            overflow: hidden;
+        }
+
+        .ratio-bar-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 3px;
+            transition: width 0.3s ease, background-color 0.4s ease;
+            box-shadow: 0 0 8px var(--accent-color);
+        }
+
+        .ratio-subtext {
+            font-size: 10.5px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            display: flex;
+            justify-content: flex-end;
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
         .info-btn {
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 11px;
             margin-left: 6px;
-            padding: 2px 4px;
-            line-height: 1;
-            opacity: 0.85;
+            padding: 2px 6px;
+            line-height: 1.2;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+
+        .info-btn:active {
+            background: rgba(255, 255, 255, 0.15);
         }
 
         .ingredient-info-box {
             display: none;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.35);
             border-left: 3px solid var(--accent-color);
             padding: 10px 14px;
             margin-top: 10px;
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 10px;
+            font-size: 12.5px;
             color: #dcdde1;
             line-height: 1.6;
         }
@@ -437,40 +533,48 @@
             display: block;
         }
 
+        /* Neon Bar Ticket Service Box */
         .service-info {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px dashed #25302a;
+            margin-top: 18px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 1px dashed rgba(46, 213, 115, 0.4);
+            border-radius: 14px;
             font-size: 14px;
-            color: #4cd137;
+            color: #2ed573;
             font-weight: 600;
             line-height: 1.5;
+            box-shadow: inset 0 0 15px rgba(46, 213, 115, 0.04);
         }
         
         .service-info span {
             color: var(--text-muted);
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             font-size: 11px;
             text-transform: uppercase;
             margin-bottom: 6px;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            font-weight: 700;
         }
 
+        /* Glowing Log Button */
         .log-action-btn {
             width: 100%;
-            background-color: var(--card-bg);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.3) 100%);
             color: var(--accent-color);
             border: 1.5px solid var(--accent-color);
-            border-radius: 16px;
-            padding: 15px;
+            border-radius: 18px;
+            padding: 16px;
             font-family: 'Fredoka', sans-serif;
             font-size: 16px;
             font-weight: 600;
-            letter-spacing: 0.8px;
+            letter-spacing: 1px;
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            transition: all 0.2s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-glow);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -479,17 +583,18 @@
         }
 
         .log-action-btn:active {
-            transform: scale(0.98);
-            background-color: rgba(255, 211, 42, 0.1);
+            transform: scale(0.97);
+            background-color: var(--accent-bg-subtle);
         }
 
         .log-action-btn.success {
-            background-color: var(--success-color);
+            background: var(--success-color);
             border-color: var(--success-color);
-            color: #0e1310;
+            color: #0b100d;
+            box-shadow: 0 0 25px rgba(46, 213, 115, 0.6);
         }
 
-        /* Modal / Stats Menu Styles */
+        /* Modal Styles */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -497,8 +602,8 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.82);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             z-index: 1000;
             display: none;
             align-items: center;
@@ -512,8 +617,8 @@
         }
 
         .modal-box {
-            background-color: var(--card-bg);
-            border: 1px solid #28372f;
+            background-color: #171e1a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 24px;
             width: 100%;
             max-width: 440px;
@@ -521,7 +626,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
             animation: modalFadeIn 0.25s ease-out;
         }
 
@@ -535,7 +640,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #233028;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.07);
         }
 
         .modal-title {
@@ -573,7 +678,7 @@
 
         .month-btn {
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid #27352d;
+            border: 1px solid rgba(255, 255, 255, 0.07);
             border-radius: 14px;
             padding: 14px 16px;
             color: var(--text-color);
@@ -587,7 +692,7 @@
         }
 
         .month-btn:active {
-            background: rgba(255, 211, 42, 0.1);
+            background: var(--accent-bg-subtle);
             border-color: var(--accent-color);
             transform: scale(0.99);
         }
@@ -596,7 +701,7 @@
             font-family: 'Fredoka', sans-serif;
             font-size: 14px;
             color: var(--accent-color);
-            background: rgba(0, 0, 0, 0.35);
+            background: rgba(0, 0, 0, 0.4);
             padding: 5px 12px;
             border-radius: 20px;
             font-weight: 700;
@@ -621,8 +726,8 @@
         }
 
         .stat-summary-card {
-            background: rgba(0,0,0,0.3);
-            border-left: 3px solid var(--accent-color);
+            background: rgba(0,0,0,0.35);
+            border-left: 3.5px solid var(--accent-color);
             border-radius: 12px;
             padding: 12px 16px;
             margin-bottom: 16px;
@@ -732,7 +837,7 @@
     <div class="ingredients-card">
         <div id="ingredientsList"></div>
         <div class="service-info" id="serviceContainer">
-            <span>💡 Service:</span>
+            <span>⚡ Service:</span>
             <div id="serviceText"></div>
         </div>
     </div>
@@ -770,6 +875,17 @@
         let db = null;
         let cloudData = {};
         let allLogsData = {};
+
+        // Helper για μετατροπή hex χρώματος σε RGBA
+        function hexToRgba(hex, alpha) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16);
+            const r = (num >> 16) & 255;
+            const g = (num >> 8) & 255;
+            const b = num & 255;
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
 
         function updateConnectionStatus(isOnline) {
             const syncText = document.getElementById('syncText');
@@ -830,16 +946,13 @@
             
             for (const item of queue) {
                 try {
-                    // 1. Εγγραφή στο all_logs με το αρχικό timestamp
                     await db.ref('all_logs/' + item.id).set(item);
 
-                    // 2. Ενημέρωση του πρόσφατου ιστορικού last_premixes
                     const snap = await db.ref('last_premixes/' + item.cocktail).once('value');
                     let currentHistory = getHistoryArray(snap.val());
                     
                     if (!currentHistory.some(h => h.id === item.id)) {
                         currentHistory.unshift(item);
-                        // Ταξινόμηση ώστε να μπει στη σωστή χρονολογική σειρά
                         currentHistory.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
                         await db.ref('last_premixes/' + item.cocktail).set(currentHistory.slice(0, 3));
                     }
@@ -853,7 +966,6 @@
             isSyncing = false;
         }
 
-        // Ακροατές κατάστασης σύνδεσης
         window.addEventListener('online', () => {
             updateConnectionStatus(true);
             syncOfflineQueue();
@@ -1008,16 +1120,26 @@
             }
             
             const recipe = recipes[currentCocktail];
+            
+            // Ενημέρωση Dynamic Glow μεταβλητών
             document.documentElement.style.setProperty('--accent-color', recipe.color);
+            document.documentElement.style.setProperty('--accent-glow', hexToRgba(recipe.color, 0.22));
+            document.documentElement.style.setProperty('--accent-glow-strong', hexToRgba(recipe.color, 0.45));
+            document.documentElement.style.setProperty('--accent-bg-subtle', hexToRgba(recipe.color, 0.08));
             
             const percentage = ((sliderValue - slider.min) / (slider.max - slider.min)) * 100;
             const track = document.getElementById('sliderTrack');
             if (track) {
-                track.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percentage}%, #25302a ${percentage}%, #25302a 100%)`;
+                track.style.background = `linear-gradient(to right, var(--accent-color) 0%, var(--accent-color) ${percentage}%, #202b25 ${percentage}%, #202b25 100%)`;
             }
 
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             document.getElementById('volumeDisplay').innerText = formattedVolume;
+
+            // Υπολογισμός συνολικού όγκου βάσης για τα Ratio Bars
+            const totalBaseMl = recipe.ingredients.reduce((sum, ing) => {
+                return sum + (ing.unit === 'ml' ? ing.baseAmount : 0);
+            }, 0);
 
             const listContainer = document.getElementById('ingredientsList');
             listContainer.innerHTML = '';
@@ -1037,8 +1159,21 @@
                         ? ing.info.map(line => `• ${line}`).join('<br>') 
                         : ing.info;
 
-                    infoBtn = `<button class="info-btn" onclick="toggleIngInfo('ing-info-${index}', event)">ℹ️</button>`;
+                    infoBtn = `<button class="info-btn" onclick="toggleIngInfo('ing-info-${index}', event)">ℹ️ Info</button>`;
                     infoBox = `<div id="ing-info-${index}" class="ingredient-info-box">${infoContent}</div>`;
+                }
+
+                // Ratio percentage
+                let ratioPct = 0;
+                let ratioBarHtml = '';
+                if (ing.unit === 'ml' && totalBaseMl > 0) {
+                    ratioPct = Math.round((ing.baseAmount / totalBaseMl) * 100);
+                    ratioBarHtml = `
+                        <div class="ratio-bar-track">
+                            <div class="ratio-bar-fill" style="width: ${ratioPct}%;"></div>
+                        </div>
+                        <div class="ratio-subtext">${ratioPct}% of mix</div>
+                    `;
                 }
 
                 itemDiv.innerHTML = `
@@ -1046,6 +1181,7 @@
                         <span class="ing-name">${ing.name} ${infoBtn}</span>
                         <span class="ing-amount">${calculatedAmount} ${ing.unit}</span>
                     </div>
+                    ${ratioBarHtml}
                     ${infoBox}
                 `;
                 listContainer.appendChild(itemDiv);
@@ -1064,7 +1200,7 @@
             return [];
         }
 
-        // Global Warning Check (15 days for Negroni, 4 days for others)
+        // Global Warning Check
         function updateGlobalWarning() {
             const container = document.getElementById('globalWarningContainer');
             if (!container) return;
@@ -1155,7 +1291,6 @@
             const sliderValue = parseInt(slider.value);
             if (sliderValue === 0) return;
 
-            // Έλεγχος αν καταχωρήθηκε πρόσφατα (εντός 10 λεπτών)
             const history = getHistoryArray(cloudData[currentCocktail]);
             if (history.length > 0 && history[0].timestamp) {
                 const nowMs = Date.now();
@@ -1180,7 +1315,6 @@
             const totalVolume = sliderValue * 100;
             const formattedVolume = totalVolume === 1000 ? "1 lt" : totalVolume + " ml";
             
-            // Κλείδωμα αρχικού χρόνου κατά το πάτημα του κουμπιού
             const now = new Date();
             const dateStr = now.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' });
             const timeStr = now.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' });
@@ -1198,7 +1332,6 @@
                 timestamp: now.getTime()
             };
 
-            // 1. Άμεση ενημέρωση τοπικών δεδομένων UI
             allLogsData[logId] = batchData;
 
             let updatedHistory = getHistoryArray(cloudData[currentCocktail]);
@@ -1211,7 +1344,6 @@
             updateLastPrepUI();
             updateGlobalWarning();
 
-            // 2. Αποθήκευση στην Offline Queue & Συγχρονισμός
             const queue = getOfflineQueue();
             queue.push(batchData);
             saveOfflineQueue(queue);
@@ -1246,14 +1378,12 @@
             
             if (!confirmDelete) return;
 
-            // Αφαίρεση από Offline Queue εάν υπήρχε εκεί
             if (latest.id) {
                 const queue = getOfflineQueue();
                 const filteredQueue = queue.filter(q => q.id !== latest.id);
                 saveOfflineQueue(filteredQueue);
             }
 
-            // Remove from permanent all_logs node
             if (latest.id) {
                 if (db && navigator.onLine) {
                     db.ref('all_logs/' + latest.id).remove();
@@ -1269,7 +1399,6 @@
                 });
             }
 
-            // Remove from recent history
             history.shift();
 
             if (db && navigator.onLine) {
