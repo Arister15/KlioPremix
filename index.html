@@ -680,7 +680,7 @@
         <h1 id="appTitle">🗿 Klio Premix 🌴</h1>
         <div class="live-status">
             <span class="dot" id="syncDot"></span>
-            <span id="syncText">Live</span>
+            <span id="syncText">Online</span>
         </div>
     </header>
 
@@ -771,6 +771,20 @@
         let cloudData = {};
         let allLogsData = {};
 
+        function updateConnectionStatus(isOnline) {
+            const syncText = document.getElementById('syncText');
+            const syncDot = document.getElementById('syncDot');
+            if (!syncText || !syncDot) return;
+
+            if (isOnline) {
+                syncText.innerText = "Online";
+                syncDot.classList.remove('offline');
+            } else {
+                syncText.innerText = "Offline";
+                syncDot.classList.add('offline');
+            }
+        }
+
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
@@ -785,8 +799,8 @@
                 allLogsData = snapshot.val() || {};
             });
         } catch (e) {
-            console.warn("Firebase fallback:", e);
-            document.getElementById('syncText').innerText = "Local Mode";
+            console.warn("Firebase init error, running in offline mode:", e);
+            updateConnectionStatus(false);
         }
 
         /* -------------------------------------------------------------
@@ -857,20 +871,6 @@
                     syncOfflineQueue();
                 }
             });
-        }
-
-        function updateConnectionStatus(isOnline) {
-            const syncText = document.getElementById('syncText');
-            const syncDot = document.getElementById('syncDot');
-            if (!syncText || !syncDot) return;
-
-            if (isOnline) {
-                syncText.innerText = "Live";
-                syncDot.classList.remove('offline');
-            } else {
-                syncText.innerText = "Offline";
-                syncDot.classList.add('offline');
-            }
         }
 
         const recipes = {
