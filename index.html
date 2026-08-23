@@ -1075,7 +1075,11 @@
                 if (diffMs >= 0 && diffMs < tenMinutesMs) {
                     const diffMinutes = Math.floor(diffMs / (60 * 1000));
                     const cocktailName = recipes[currentCocktail].name;
-                    const confirmMsg = `Καταχωρήθηκε ήδη 1 premix (${cocktailName}) πριν από ${diffMinutes} λεπτά, είσαι σίγουρος ότι θέλεις να δημιουργηθεί νέα καταχώριση;`;
+                    const timeText = diffMinutes === 0 
+                        ? "μόλις τώρα" 
+                        : (diffMinutes === 1 ? "πριν από 1 λεπτό" : `πριν από ${diffMinutes} λεπτά`);
+
+                    const confirmMsg = `⚠️ Πρόσφατη Καταχώριση\n\nΥπάρχει ήδη καταχώριση για "${cocktailName}" ${timeText}.\n\nΣυνέχεια με δημιουργία νέου premix;`;
                     
                     if (!confirm(confirmMsg)) {
                         return;
