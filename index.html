@@ -673,7 +673,7 @@
             line-height: 1;
         }
 
-        /* Modal Body: Απόκρυψη Scrollbar σε όλους τους browsers */
+        /* Modal Body: Απόκρυψη Scrollbar */
         .modal-body {
             padding: 18px 20px;
             overflow-y: auto;
@@ -689,6 +689,102 @@
             width: 0 !important;
             height: 0 !important;
             background: transparent !important;
+        }
+
+        /* Custom Confirmation Modal Styles */
+        .confirm-modal-overlay {
+            z-index: 2000;
+        }
+
+        .confirm-modal-box {
+            max-width: 360px;
+            padding: 24px 20px 20px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .confirm-modal-icon {
+            font-size: 40px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .confirm-modal-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .confirm-modal-body {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            line-height: 1.55;
+            width: 100%;
+        }
+
+        .confirm-modal-highlight {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-top: 10px;
+            color: var(--text-color);
+            font-weight: 500;
+            text-align: left;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .confirm-modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        .confirm-btn {
+            border-radius: 14px;
+            padding: 13px 10px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .confirm-btn.cancel {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .confirm-btn.cancel:active {
+            background: rgba(255, 255, 255, 0.16);
+            color: var(--text-color);
+        }
+
+        .confirm-btn.confirm {
+            background: var(--accent-color);
+            color: #0b100d;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .confirm-btn.confirm.danger {
+            background: var(--warning-color);
+            color: #ffffff;
+            box-shadow: 0 4px 16px rgba(255, 71, 87, 0.4);
+        }
+
+        .confirm-btn:active {
+            transform: scale(0.97);
         }
 
         .month-list {
@@ -905,6 +1001,19 @@
             </div>
             <div class="modal-body" id="modalBody">
                 <!-- Content injected dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="modal-overlay confirm-modal-overlay" id="confirmModal" onclick="handleConfirmModalClose(false)">
+        <div class="modal-box confirm-modal-box" onclick="event.stopPropagation()">
+            <div class="confirm-modal-icon" id="confirmModalIcon">⚠️</div>
+            <h3 class="confirm-modal-title" id="confirmModalTitle">Επιβεβαίωση</h3>
+            <div class="confirm-modal-body" id="confirmModalBody"></div>
+            <div class="confirm-modal-actions">
+                <button class="confirm-btn cancel" id="confirmCancelBtn" onclick="handleConfirmModalClose(false)">Ακύρωση</button>
+                <button class="confirm-btn confirm" id="confirmOkBtn" onclick="handleConfirmModalClose(true)">Συνέχεια</button>
             </div>
         </div>
     </div>
@@ -1156,6 +1265,51 @@
         let currentViewingMonthKey = null;
         let currentViewingMonthLabel = '';
 
+        /* -------------------------------------------------------------
+           Custom Confirm Modal Helper
+        ------------------------------------------------------------- */
+        let confirmResolve = null;
+
+        function showCustomConfirm({ title, icon, htmlMessage, confirmText = "Συνέχεια", cancelText = "Ακύρωση", isDanger = false }) {
+            return new Promise((resolve) => {
+                confirmResolve = resolve;
+                const modal = document.getElementById('confirmModal');
+                document.getElementById('confirmModalIcon').innerText = icon || '⚠️';
+                document.getElementById('confirmModalTitle').innerText = title || 'Επιβεβαίωση';
+                document.getElementById('confirmModalBody').innerHTML = htmlMessage || '';
+                
+                const okBtn = document.getElementById('confirmOkBtn');
+                okBtn.innerText = confirmText;
+                if (isDanger) {
+                    okBtn.classList.add('danger');
+                } else {
+                    okBtn.classList.remove('danger');
+                }
+
+                document.getElementById('confirmCancelBtn').innerText = cancelText;
+
+                document.body.classList.add('modal-open');
+                modal.classList.add('active');
+
+                if (navigator.vibrate) navigator.vibrate(25);
+            });
+        }
+
+        function handleConfirmModalClose(result) {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('active');
+            
+            const statsModal = document.getElementById('statsModal');
+            if (!statsModal || !statsModal.classList.contains('active')) {
+                document.body.classList.remove('modal-open');
+            }
+
+            if (confirmResolve) {
+                confirmResolve(result);
+                confirmResolve = null;
+            }
+        }
+
         function selectCocktail(cocktailKey, element) {
             document.querySelectorAll('.cocktail-btn').forEach(btn => btn.classList.remove('active'));
             element.classList.add('active');
@@ -1347,7 +1501,7 @@
             `).join('');
         }
 
-        function recordNewBatch() {
+        async function recordNewBatch() {
             const slider = document.getElementById('premixSlider');
             const sliderValue = parseInt(slider.value);
             if (sliderValue === 0) return;
@@ -1365,11 +1519,19 @@
                         ? "μόλις τώρα" 
                         : (diffMinutes === 1 ? "πριν από 1 λεπτό" : `πριν από ${diffMinutes} λεπτά`);
 
-                    const confirmMsg = `⚠️ Πρόσφατη Καταχώριση\n\nΥπάρχει ήδη καταχώριση για ${cocktailName} ${timeText}.\n\nΣυνέχεια με δημιουργία νέου premix;`;
-                    
-                    if (!confirm(confirmMsg)) {
-                        return;
-                    }
+                    const confirmed = await showCustomConfirm({
+                        title: "Πρόσφατη Καταχώριση",
+                        icon: "⚠️",
+                        htmlMessage: `
+                            Υπάρχει ήδη καταχώριση για <strong>${cocktailName}</strong> ${timeText}.
+                            <div class="confirm-modal-highlight">Συνέχεια με δημιουργία νέου premix;</div>
+                        `,
+                        confirmText: "Καταχώριση",
+                        cancelText: "Ακύρωση",
+                        isDanger: false
+                    });
+
+                    if (!confirmed) return;
                 }
             }
 
@@ -1430,14 +1592,29 @@
             }, 1000);
         }
 
-        function deleteLatestLog() {
+        async function deleteLatestLog() {
             let history = getHistoryArray(cloudData[currentCocktail]);
             if (history.length === 0) return;
 
             const latest = history[0];
-            const confirmDelete = confirm(`Διαγραφή τελευταίας εγγραφής;\n\n🍹 ${recipes[currentCocktail].name}\n📦 ${latest.volume} (${latest.date})`);
-            
-            if (!confirmDelete) return;
+            const cocktailName = recipes[currentCocktail].name;
+
+            const confirmed = await showCustomConfirm({
+                title: "Διαγραφή Premix",
+                icon: "🗑️",
+                htmlMessage: `
+                    Θέλεις σίγουρα να διαγράψεις την τελευταία εγγραφή;
+                    <div class="confirm-modal-highlight">
+                        🍹 <strong>${cocktailName}</strong><br>
+                        📦 <strong>${latest.volume || '-'}</strong> (${latest.date || '-'})
+                    </div>
+                `,
+                confirmText: "Διαγραφή",
+                cancelText: "Ακύρωση",
+                isDanger: true
+            });
+
+            if (!confirmed) return;
 
             if (latest.id) {
                 const queue = getOfflineQueue();
