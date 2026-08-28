@@ -68,6 +68,11 @@
             opacity: 1;
         }
 
+        body.modal-open {
+            overflow: hidden !important;
+            touch-action: none;
+        }
+
         /* Dynamic Ambient Glow */
         body::before {
             content: '';
@@ -668,6 +673,8 @@
             padding: 18px 20px;
             overflow-y: auto;
             flex: 1;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
         }
 
         .month-list {
@@ -725,15 +732,27 @@
             cursor: pointer;
         }
 
+        /* Interactive Stats Summary Card */
         .stat-summary-card {
             background: rgba(0,0,0,0.35);
             border-left: 3.5px solid var(--accent-color);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 14px 16px;
             margin-bottom: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.03);
+            border-right: 1px solid rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .stat-summary-card:active {
+            transform: scale(0.98);
+            background: rgba(0, 0, 0, 0.55);
         }
 
         .stat-summary-card .label {
@@ -741,13 +760,28 @@
             color: var(--text-muted);
             text-transform: uppercase;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-summary-card .unit-toggle-hint {
+            font-size: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--accent-color);
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 4px;
         }
 
         .stat-summary-card .val {
             font-family: 'Fredoka', sans-serif;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--accent-color);
+            text-align: right;
         }
 
         .stats-cocktail-list {
@@ -759,7 +793,7 @@
         .stats-cocktail-row {
             background: rgba(255, 255, 255, 0.03);
             border-radius: 12px;
-            padding: 14px 16px;
+            padding: 13px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -776,6 +810,7 @@
             font-size: 17px;
             font-weight: 700;
             color: var(--accent-color);
+            text-align: right;
         }
     </style>
 </head>
@@ -989,6 +1024,7 @@
             happy_hawaiian: {
                 name: "Happy Hawaiian",
                 color: "#00cbc6",
+                serviceDose: 120, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Lime juice", baseAmount: 160, unit: "ml" },
@@ -1002,6 +1038,7 @@
             three_birds: {
                 name: "Three Little Birds",
                 color: "#ffbb00",
+                serviceDose: 100, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Plantation Original dark", baseAmount: 500, unit: "ml" },
                     { name: "Banana puree", baseAmount: 200, unit: "ml" },
@@ -1014,6 +1051,7 @@
             tiki_tijuana: {
                 name: "Tiki in Tijuana",
                 color: "#4cd137",
+                serviceDose: 90, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Tequila", baseAmount: 550, unit: "ml" },
                     { name: "Mango puree", baseAmount: 220, unit: "ml" },
@@ -1025,6 +1063,7 @@
             mama_africa: {
                 name: "Mama Africa",
                 color: "#e55039",
+                serviceDose: 125, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Rum", baseAmount: 400, unit: "ml" },
                     { name: "Lime juice", baseAmount: 160, unit: "ml" },
@@ -1037,6 +1076,7 @@
             kyoto: {
                 name: "Kyoto",
                 color: "#a55eea",
+                serviceDose: 85, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Gin", baseAmount: 550, unit: "ml" },
                     { 
@@ -1057,6 +1097,7 @@
             tiki_zombie: {
                 name: "Tiki Zombie",
                 color: "#fb6c0d",
+                serviceDose: 115, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Sugar syrup", baseAmount: 80, unit: "ml" },
@@ -1069,6 +1110,7 @@
             bahama_mama: {
                 name: "Bahama Mama",
                 color: "#ff388b",
+                serviceDose: 130, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Rum", baseAmount: 350, unit: "ml" },
                     { name: "Malibu", baseAmount: 140, unit: "ml" },
@@ -1081,6 +1123,7 @@
             negroni: {
                 name: "Negroni",
                 color: "#d8000b",
+                serviceDose: 100, // ml premix ανά cocktail
                 ingredients: [
                     { name: "Gin", baseAmount: 300, unit: "ml" },
                     { name: "Campari", baseAmount: 300, unit: "ml" },
@@ -1093,6 +1136,11 @@
 
         let currentCocktail = 'happy_hawaiian';
         let lastSliderValue = 10; 
+
+        // State για τα μηνιαία στατιστικά
+        let statsViewMode = 'volume'; // 'volume' ή 'cocktails'
+        let currentViewingMonthKey = null;
+        let currentViewingMonthLabel = '';
 
         function selectCocktail(cocktailKey, element) {
             document.querySelectorAll('.cocktail-btn').forEach(btn => btn.classList.remove('active'));
@@ -1467,6 +1515,7 @@
         function openMonthlyStats() {
             const modal = document.getElementById('statsModal');
             modal.classList.add('active');
+            document.body.classList.add('modal-open');
             renderMonthSelectionView();
         }
 
@@ -1476,6 +1525,15 @@
             }
             const modal = document.getElementById('statsModal');
             modal.classList.remove('active');
+            document.body.classList.remove('modal-open');
+        }
+
+        function toggleStatsViewMode() {
+            statsViewMode = (statsViewMode === 'volume') ? 'cocktails' : 'volume';
+            if (navigator.vibrate) navigator.vibrate(30);
+            if (currentViewingMonthKey) {
+                renderMonthDetailView(currentViewingMonthKey, currentViewingMonthLabel);
+            }
         }
 
         function renderMonthSelectionView() {
@@ -1534,6 +1592,9 @@
         }
 
         function renderMonthDetailView(monthKey, monthLabel) {
+            currentViewingMonthKey = monthKey;
+            currentViewingMonthLabel = monthLabel;
+
             const body = document.getElementById('modalBody');
             const logsArray = Object.values(allLogsData || {});
 
@@ -1543,6 +1604,7 @@
                     key: key,
                     name: recipes[key].name,
                     color: recipes[key].color,
+                    serviceDose: recipes[key].serviceDose || 100,
                     totalMl: 0
                 };
             });
@@ -1565,11 +1627,29 @@
                 }
             });
 
-            const sortedList = Object.values(cocktailStats).sort((a, b) => b.totalMl - a.totalMl);
+            // Υπολογισμός αριθμού cocktails ανά συνταγή (στρογγυλοποίηση προς τα κάτω)
+            let grandTotalCocktails = 0;
+            Object.values(cocktailStats).forEach(stat => {
+                stat.cocktails = Math.floor(stat.totalMl / stat.serviceDose);
+                grandTotalCocktails += stat.cocktails;
+            });
 
-            const formattedGrandTotal = grandTotalMl >= 1000 
-                ? (grandTotalMl / 1000).toFixed(1) + ' lt' 
-                : grandTotalMl + ' ml';
+            const isCocktailsMode = (statsViewMode === 'cocktails');
+
+            // Δυναμική φθίνουσα ταξινόμηση ανάλογα με την ενεργή μονάδα (cocktails ή ml)
+            const sortedList = Object.values(cocktailStats).sort((a, b) => {
+                if (isCocktailsMode) {
+                    return (b.cocktails - a.cocktails) || (b.totalMl - a.totalMl);
+                }
+                return b.totalMl - a.totalMl;
+            });
+
+            // Συνολική εμφάνιση
+            const summaryLabel = isCocktailsMode ? 'Συνολικα Cocktails' : 'Συνολικη Παραγωγη';
+            const toggleHint = isCocktailsMode ? '⇄ Litres' : '⇄ Cocktails';
+            const formattedGrandTotal = isCocktailsMode
+                ? `${grandTotalCocktails} 🍸`
+                : (grandTotalMl >= 1000 ? (grandTotalMl / 1000).toFixed(1) + ' lt' : grandTotalMl + ' ml');
 
             body.innerHTML = `
                 <div class="month-detail-header">
@@ -1577,9 +1657,10 @@
                     <strong style="font-size: 15px;">${monthLabel}</strong>
                 </div>
 
-                <div class="stat-summary-card">
+                <div class="stat-summary-card" onclick="toggleStatsViewMode()" title="Πάτα για αλλαγή μονάδας">
                     <div>
-                        <div class="label">Συνολικη Παραγωγη</div>
+                        <div class="label">${summaryLabel}</div>
+                        <span class="unit-toggle-hint">${toggleHint}</span>
                     </div>
                     <div class="val">${formattedGrandTotal}</div>
                 </div>
@@ -1589,12 +1670,24 @@
                         const volDisplay = stat.totalMl >= 1000 
                             ? (stat.totalMl / 1000).toFixed(1) + ' lt' 
                             : stat.totalMl + ' ml';
-                        const opacity = stat.totalMl === 0 ? 'opacity: 0.4;' : '';
+                        
+                        const displayVal = isCocktailsMode 
+                            ? `${stat.cocktails} 🍸` 
+                            : volDisplay;
+
+                        const subText = (isCocktailsMode && stat.totalMl > 0)
+                            ? `<div style="font-size: 11px; color: var(--text-muted); margin-top:2px;">${volDisplay} premix</div>`
+                            : '';
+
+                        const opacity = (isCocktailsMode ? stat.cocktails === 0 : stat.totalMl === 0) ? 'opacity: 0.35;' : '';
 
                         return `
                             <div class="stats-cocktail-row" style="${opacity}">
-                                <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
-                                <div class="stats-cocktail-volume">${volDisplay}</div>
+                                <div>
+                                    <span class="stats-cocktail-name" style="color: ${stat.color}">${stat.name}</span>
+                                    ${subText}
+                                </div>
+                                <div class="stats-cocktail-volume">${displayVal}</div>
                             </div>
                         `;
                     }).join('')}
