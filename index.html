@@ -164,6 +164,7 @@
             box-shadow: 0 6px 20px rgba(255, 71, 87, 0.15);
         }
 
+        /* Section Title Fix: Κλείδωμα σε 1 γραμμή χωρίς σπάσιμο του emoji */
         .section-title {
             font-family: 'Fredoka', sans-serif;
             font-size: 14px;
@@ -173,7 +174,10 @@
             font-weight: 600;
             letter-spacing: 1px;
             display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
             align-items: center;
+            white-space: nowrap;
             gap: 6px;
         }
 
@@ -669,12 +673,22 @@
             line-height: 1;
         }
 
+        /* Modal Body: Απόκρυψη Scrollbar σε όλους τους browsers */
         .modal-body {
             padding: 18px 20px;
             overflow-y: auto;
             flex: 1;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+        }
+
+        .modal-body::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
         }
 
         .month-list {
