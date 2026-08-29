@@ -15,7 +15,6 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Firebase Realtime Database SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -164,7 +163,7 @@
             box-shadow: 0 6px 20px rgba(255, 71, 87, 0.15);
         }
 
-        /* Section Title Fix: Κλείδωμα σε 1 γραμμή χωρίς σπάσιμο του emoji */
+        /* Section Title Fix */
         .section-title {
             font-family: 'Fredoka', sans-serif;
             font-size: 14px;
@@ -270,8 +269,8 @@
         .slider-input {
             -webkit-appearance: none;
             appearance: none;
-            width: calc(100% + 44px) !important;
-            margin: 0 -22px !important;
+            width: calc(100% + 32px) !important;
+            margin: 0 -16px !important;
             background: transparent !important;
             height: 44px;
             outline: none;
@@ -280,37 +279,39 @@
             cursor: pointer;
         }
 
+        /* Minimal Glowing Glass Knob */
         .slider-input::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 44px;
-            height: 44px;
-            background-color: transparent !important;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><text y="34" x="22" font-size="34" text-anchor="middle">🧪</text></svg>') !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            outline: none !important;
-            transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow-strong), 0 4px 10px rgba(0,0,0,0.5);
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.4s ease;
         }
-        
+
         .slider-input::-webkit-slider-thumb:active {
-            transform: scale(1.22);
+            transform: scale(1.18);
+            box-shadow: 0 0 25px var(--accent-color);
         }
 
         .slider-input::-moz-range-thumb {
-            width: 44px;
-            height: 44px;
-            background-color: transparent !important;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><text y="34" x="22" font-size="34" text-anchor="middle">🧪</text></svg>') !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
-            border: none !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            outline: none !important;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow-strong), 0 4px 10px rgba(0,0,0,0.5);
+            cursor: grab;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.4s ease;
+        }
+
+        .slider-input::-moz-range-thumb:active {
+            transform: scale(1.18);
+            box-shadow: 0 0 25px var(--accent-color);
         }
 
         .slider-labels {
@@ -676,7 +677,6 @@
             line-height: 1;
         }
 
-        /* Modal Body: Απόκρυψη Scrollbar */
         .modal-body {
             padding: 18px 20px;
             overflow-y: auto;
@@ -943,7 +943,6 @@
         </div>
     </header>
 
-    <!-- Top Warning Banner Container -->
     <div id="globalWarningContainer" class="global-warning-container"></div>
 
     <div class="section-title">🍹 COCKTAIL</div>
@@ -1001,7 +1000,6 @@
         <span id="logBtnText">Log Premix</span>
     </button>
 
-    <!-- Monthly Stats Modal -->
     <div class="modal-overlay" id="statsModal" onclick="closeMonthlyStats(event)">
         <div class="modal-box" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -1009,12 +1007,10 @@
                 <button class="modal-close-btn" onclick="closeMonthlyStats()">✕</button>
             </div>
             <div class="modal-body" id="modalBody">
-                <!-- Content injected dynamically -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Custom Confirmation Modal -->
     <div class="modal-overlay confirm-modal-overlay" id="confirmModal" onclick="handleConfirmModalClose(false)">
         <div class="modal-box confirm-modal-box" onclick="event.stopPropagation()">
             <div class="confirm-modal-icon" id="confirmModalIcon">⚠️</div>
@@ -1043,7 +1039,6 @@
         let cloudData = {};
         let allLogsData = {};
 
-        // Helper για μετατροπή hex χρώματος σε RGBA
         function hexToRgba(hex, alpha) {
             let c = hex.replace('#', '');
             if (c.length === 3) c = c.split('').map(x => x + x).join('');
@@ -1156,7 +1151,7 @@
             happy_hawaiian: {
                 name: "Happy Hawaiian",
                 color: "#00cbc6",
-                serviceDose: 120, // ml premix ανά cocktail
+                serviceDose: 120,
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Lime juice", baseAmount: 160, unit: "ml" },
@@ -1170,7 +1165,7 @@
             three_birds: {
                 name: "Three Little Birds",
                 color: "#ffbb00",
-                serviceDose: 100, // ml premix ανά cocktail
+                serviceDose: 100,
                 ingredients: [
                     { name: "Plantation Original dark", baseAmount: 500, unit: "ml" },
                     { name: "Banana puree", baseAmount: 200, unit: "ml" },
@@ -1183,7 +1178,7 @@
             tiki_tijuana: {
                 name: "Tiki in Tijuana",
                 color: "#4cd137",
-                serviceDose: 90, // ml premix ανά cocktail
+                serviceDose: 90,
                 ingredients: [
                     { name: "Tequila", baseAmount: 550, unit: "ml" },
                     { name: "Mango puree", baseAmount: 220, unit: "ml" },
@@ -1195,7 +1190,7 @@
             mama_africa: {
                 name: "Mama Africa",
                 color: "#e55039",
-                serviceDose: 125, // ml premix ανά cocktail
+                serviceDose: 125,
                 ingredients: [
                     { name: "Rum", baseAmount: 400, unit: "ml" },
                     { name: "Lime juice", baseAmount: 160, unit: "ml" },
@@ -1208,7 +1203,7 @@
             kyoto: {
                 name: "Kyoto",
                 color: "#a55eea",
-                serviceDose: 85, // ml premix ανά cocktail
+                serviceDose: 85,
                 ingredients: [
                     { name: "Gin", baseAmount: 550, unit: "ml" },
                     { 
@@ -1229,7 +1224,7 @@
             tiki_zombie: {
                 name: "Tiki Zombie",
                 color: "#fb6c0d",
-                serviceDose: 115, // ml premix ανά cocktail
+                serviceDose: 115,
                 ingredients: [
                     { name: "Blend of rums", baseAmount: 480, unit: "ml" },
                     { name: "Sugar syrup", baseAmount: 80, unit: "ml" },
@@ -1242,7 +1237,7 @@
             bahama_mama: {
                 name: "Bahama Mama",
                 color: "#ff388b",
-                serviceDose: 130, // ml premix ανά cocktail
+                serviceDose: 130,
                 ingredients: [
                     { name: "Rum", baseAmount: 350, unit: "ml" },
                     { name: "Malibu", baseAmount: 140, unit: "ml" },
@@ -1255,7 +1250,7 @@
             negroni: {
                 name: "Negroni",
                 color: "#d8000b",
-                serviceDose: 100, // ml premix ανά cocktail
+                serviceDose: 100,
                 ingredients: [
                     { name: "Gin", baseAmount: 300, unit: "ml" },
                     { name: "Campari", baseAmount: 300, unit: "ml" },
@@ -1270,7 +1265,7 @@
         let lastSliderValue = 10; 
 
         // State για τα μηνιαία στατιστικά
-        let statsViewMode = 'volume'; // 'volume' ή 'cocktails'
+        let statsViewMode = 'volume'; 
         let currentViewingMonthKey = null;
         let currentViewingMonthLabel = '';
 
@@ -1827,7 +1822,6 @@
                 }
             });
 
-            // Υπολογισμός αριθμού cocktails ανά συνταγή (στρογγυλοποίηση προς τα κάτω)
             let grandTotalCocktails = 0;
             Object.values(cocktailStats).forEach(stat => {
                 stat.cocktails = Math.floor(stat.totalMl / stat.serviceDose);
@@ -1836,7 +1830,6 @@
 
             const isCocktailsMode = (statsViewMode === 'cocktails');
 
-            // Δυναμική φθίνουσα ταξινόμηση ανάλογα με την ενεργή μονάδα (cocktails ή ml)
             const sortedList = Object.values(cocktailStats).sort((a, b) => {
                 if (isCocktailsMode) {
                     return (b.cocktails - a.cocktails) || (b.totalMl - a.totalMl);
@@ -1844,7 +1837,6 @@
                 return b.totalMl - a.totalMl;
             });
 
-            // Συνολική εμφάνιση
             const summaryLabel = isCocktailsMode ? 'Συνολικα Cocktails' : 'Συνολικη Παραγωγη';
             const toggleHint = isCocktailsMode ? '⇄ Litres' : '⇄ Cocktails';
             const formattedGrandTotal = isCocktailsMode
