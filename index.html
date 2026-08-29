@@ -610,9 +610,9 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.82);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.60);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 1000;
             display: none;
             align-items: center;
@@ -626,8 +626,10 @@
         }
 
         .modal-box {
-            background-color: #171e1a;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(18, 25, 21, 0.75);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 24px;
             width: 100%;
             max-width: 440px;
@@ -635,7 +637,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
             animation: modalFadeIn 0.25s ease-out;
         }
 
@@ -650,6 +652,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .modal-title {
@@ -704,6 +707,11 @@
             flex-direction: column;
             align-items: center;
             gap: 12px;
+            background: rgba(16, 23, 19, 0.82);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.15);
         }
 
         .confirm-modal-icon {
@@ -728,7 +736,7 @@
         }
 
         .confirm-modal-highlight {
-            background: rgba(255, 255, 255, 0.04);
+            background: rgba(0, 0, 0, 0.35);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 14px;
             padding: 12px 14px;
@@ -764,6 +772,7 @@
             background: rgba(255, 255, 255, 0.08);
             color: var(--text-muted);
             border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
         }
 
         .confirm-btn.cancel:active {
